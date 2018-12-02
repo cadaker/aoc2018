@@ -1,4 +1,5 @@
-(ns day01)
+(ns aoc2018.day01
+  (:use aoc2018.driver))
 
 (defn find-freq-reached-twice [in-diffs]
   (loop [freq 0, diffs (cycle in-diffs), seen #{0}]
@@ -7,8 +8,7 @@
         freq'
         (recur freq' (rest diffs) (conj seen freq'))))))
 
-(defn -main []
-  (let [diffs (map #(Long/valueOf %) (line-seq (java.io.BufferedReader. *in*)))
+(defsolution day01 [input]
+  (let [diffs (map #(Long/valueOf %) (clojure.string/split-lines input))
         freq (reduce + 0 diffs)]
-    (println freq)
-    (println (find-freq-reached-twice diffs))))
+    [freq (find-freq-reached-twice diffs)]))

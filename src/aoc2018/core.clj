@@ -1,15 +1,11 @@
 (ns aoc2018.core
   (:use aoc2018.driver)
+  (:require aoc2018.day01)
   (:gen-class))
 
 (defn usage []
   (println "Arguments: <solution-no>")
   (println "  where solution-no is day01 etc."))
-
-;; FIXME: remove
-(defsolution day01 [input]
-  [(first input)
-   (second input)])
 
 (defn -main
   "Main runner for the AoC solutions"
