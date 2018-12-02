@@ -1,6 +1,6 @@
 (ns aoc2018.core
   (:use aoc2018.driver)
-  (:require aoc2018.day01 aoc2018.day02)
+  (:require aoc2018.listing)
   (:gen-class))
 
 (defn usage []
