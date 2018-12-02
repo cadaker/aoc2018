@@ -1,4 +1,5 @@
-(ns day02)
+(ns day02
+  (:use aoc2018.driver))
 
 (defn letter-count-modifier [freq n]
   (if (some (partial = n) (vals freq))
@@ -23,11 +24,10 @@
         :when (= x1 x2)]
     x1))
 
-(defn -main []
-  (let [ids (line-seq (java.io.BufferedReader. *in*))
+(defsolution day02 [input]
+  (let [ids (clojure.string/split-lines input)
         freqs (map frequencies ids)
-        [count-2 count-3] (compute-factors freqs)]
-    (println (* count-2 count-3))
-    (let [matches (for [id1 ids, id2 ids, :when (id-match id1 id2)]
-                    (clojure.string/join (get-common id1 id2)))]
-      (println (first matches)))))
+        [count-2 count-3] (compute-factors freqs)
+        matches (for [id1 ids, id2 ids, :when (id-match id1 id2)]
+                  (clojure.string/join (get-common id1 id2)))]
+    [(* count-2 count-3) (first matches)]))
