@@ -1,4 +1,4 @@
-(ns day02
+(ns aoc2018.day02
   (:use aoc2018.driver))
 
 (defn letter-count-modifier [freq n]
