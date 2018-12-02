@@ -7,7 +7,7 @@
   (println "  where solution-no is day01 etc."))
 
 ;; FIXME: remove
-(defsolution "day01" [input]
+(defsolution day01 [input]
   [(first input)
    (second input)])
 
