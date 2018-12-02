@@ -25,3 +25,20 @@
     (is (= 2 (count-if (partial = 1) '(1 2 3 2 1))))
     (is (= 3 (count-if = '(1 2 3 2 1) '(1 1 3 2 2))))
     ))
+
+(deftest id-match-test
+  (testing "id-match"
+    (is (not (id-match "abcde" "abcde")))
+    (is (not (id-match "abcde" "axcye")))
+    (is (not (id-match "klmno" "pqrst")))
+    (is (id-match "fghij" "fguij"))
+    (is (id-match "a" "b"))
+    (is (id-match "xa" "xb"))
+    (is (id-match "ax" "bx"))
+    (is (id-match "xax" "xbx"))
+    ))
+
+(deftest get-common-test
+  (testing "get-common"
+    (is (= "fgij" (clojure.string/join (get-common "fghij" "fguij"))))
+    ))
