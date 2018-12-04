@@ -51,8 +51,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defsolution day04 [input]
-  (let [log (map parse-line (sort (clojure.string/split-lines input)))
-        schedules (build-schedules log)
+  (let [schedules (->> input
+                       clojure.string/split-lines
+                       sort
+                       (map parse-line)
+                       build-schedules)
         [sleepy-guard-1 sleepy-sched-1] (find-sleepy-guard schedules total-time-sleeping)
         [sleepy-guard-2 sleepy-sched-2] (find-sleepy-guard schedules max-minute-sleep)]
     [(* sleepy-guard-1 (sleepiest-minute sleepy-sched-1))
