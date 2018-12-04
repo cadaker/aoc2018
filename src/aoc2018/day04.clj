@@ -22,22 +22,15 @@
                      (update-in sched [guard t] #(inc (or % 0))))]
     (reduce (partial update-one guard) schedules (range start end))))
 
-(defn build-schedules [log-in]
-  (loop [schedules {}
-         log log-in
-         guard nil
-         start nil]
-    (if (seq log)
-      (let [entry (first log)]
-        (condp = (:type entry)
-          :guard (recur schedules (rest log) (:id entry) nil)
-          :sleep (recur schedules (rest log) guard (:t entry))
-          :wake (recur
-                 (update-schedule schedules guard start (:t entry))
-                 (rest log)
-                 guard
-                 nil)))
-      schedules)))
+(defn build-schedules [log]
+  (let [iter (fn build-schedules-iter [[schedules guard start] entry]
+               (condp = (:type entry)
+                 :guard [schedules (:id entry) nil]
+                 :sleep [schedules guard (:t entry)]
+                 :wake [(update-schedule schedules guard start (:t entry))
+                        guard
+                        nil]))]
+    (first (reduce iter [{} nil nil] log))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
