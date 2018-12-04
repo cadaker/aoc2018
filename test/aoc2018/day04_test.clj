@@ -31,3 +31,11 @@
            {3 {19 1, 20 1, 21 1, 22 1, 23 1, 24 1, 25 1, 26 1}
             5 {5 1, 6 2, 7 1, 8 1}}))
     ))
+
+(deftest total-time-sleeping-test
+  (testing "total-time-sleeping"
+    (is (= 4 (total-time-sleeping {19 1, 20 2, 21 1})))))
+
+(deftest sleepiest-minute-test
+  (testing "sleepiest-minute"
+    (is (= 20 (sleepiest-minute {19 1, 20 2, 21 1})))))

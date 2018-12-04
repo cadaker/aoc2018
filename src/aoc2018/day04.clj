@@ -15,6 +15,8 @@
      sleep-match {:type :sleep, :t (get-param sleep-match)}
      wake-match {:type :wake, :t (get-param wake-match)})))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defn update-schedule [schedules guard start end]
   (let [update-one (fn [sched guard t]
                      (update-in sched [guard t] #(inc (or % 0))))]
@@ -37,7 +39,21 @@
                  nil)))
       schedules)))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn total-time-sleeping [schedule]
+  (apply + (vals schedule)))
+
+(defn sleepiest-minute [schedule]
+  (first (apply max-key (fn [[k v]] v) schedule)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defsolution day04 [input]
-  (let [log (map parse-line (sort (clojure.string/split-lines input)))]
-    [(first log)
+  (let [log (map parse-line (sort (clojure.string/split-lines input)))
+        schedules (build-schedules log)
+        [sleepy-guard sleepy-sched] (apply max-key (fn [[guard schedule]]
+                                                     (total-time-sleeping schedule))
+                                           schedules)]
+    [(* sleepy-guard (sleepiest-minute sleepy-sched))
      0]))
