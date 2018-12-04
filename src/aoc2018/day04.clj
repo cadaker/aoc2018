@@ -15,6 +15,28 @@
      sleep-match {:type :sleep, :t (get-param sleep-match)}
      wake-match {:type :wake, :t (get-param wake-match)})))
 
+(defn update-schedule [schedules guard start end]
+  (let [update-one (fn [sched guard t]
+                     (update-in sched [guard t] #(inc (or % 0))))]
+    (reduce (fn [sched t] (update-one sched guard t)) schedules (range start end))))
+
+(defn build-schedules [log-in]
+  (loop [schedules {}
+         log log-in
+         guard nil
+         start nil]
+    (if (seq log)
+      (let [entry (first log)]
+        (condp = (:type entry)
+          :guard (recur schedules (rest log) (:id entry) nil)
+          :sleep (recur schedules (rest log) guard (:t entry))
+          :wake (recur
+                 (update-schedule schedules guard start (:t entry))
+                 (rest log)
+                 guard
+                 nil)))
+      schedules)))
+
 (defsolution day04 [input]
   (let [log (map parse-line (sort (clojure.string/split-lines input)))]
     [(first log)
