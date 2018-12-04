@@ -18,9 +18,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn update-schedule [schedules guard start end]
-  (let [update-one (fn [sched guard t]
+  (let [update-one (fn [guard sched t]
                      (update-in sched [guard t] #(inc (or % 0))))]
-    (reduce (fn [sched t] (update-one sched guard t)) schedules (range start end))))
+    (reduce (partial update-one guard) schedules (range start end))))
 
 (defn build-schedules [log-in]
   (loop [schedules {}
@@ -49,12 +49,10 @@
 
 (defn find-sleepy-guard [schedules schedule-weight-fn]
   "Returns [guard schedule] for the schedule that gives the highest result on the given fn"
-  (apply max-key (fn [[guard schedule]]
-                   (schedule-weight-fn schedule))
-         schedules))
+  (apply max-key (comp schedule-weight-fn val) schedules))
 
 (defn sleepiest-minute [schedule]
-  (first (apply max-key (fn [[k v]] v) schedule)))
+  (first (apply max-key val schedule)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
