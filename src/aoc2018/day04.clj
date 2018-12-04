@@ -44,16 +44,25 @@
 (defn total-time-sleeping [schedule]
   (apply + (vals schedule)))
 
+(defn max-minute-sleep [schedule]
+  (apply max (vals schedule)))
+
+(defn find-sleepy-guard [schedules schedule-weight-fn]
+  "Returns [guard schedule] for the schedule that gives the highest result on the given fn"
+  (apply max-key (fn [[guard schedule]]
+                   (schedule-weight-fn schedule))
+         schedules))
+
 (defn sleepiest-minute [schedule]
   (first (apply max-key (fn [[k v]] v) schedule)))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defsolution day04 [input]
   (let [log (map parse-line (sort (clojure.string/split-lines input)))
         schedules (build-schedules log)
-        [sleepy-guard sleepy-sched] (apply max-key (fn [[guard schedule]]
-                                                     (total-time-sleeping schedule))
-                                           schedules)]
-    [(* sleepy-guard (sleepiest-minute sleepy-sched))
-     0]))
+        [sleepy-guard-1 sleepy-sched-1] (find-sleepy-guard schedules total-time-sleeping)
+        [sleepy-guard-2 sleepy-sched-2] (find-sleepy-guard schedules max-minute-sleep)]
+    [(* sleepy-guard-1 (sleepiest-minute sleepy-sched-1))
+     (* sleepy-guard-2 (sleepiest-minute sleepy-sched-2))]))
