@@ -18,13 +18,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn update-schedule [schedules guard start end]
-  (let [update-one (fn [guard sched t]
+  (let [update-one (fn [sched t]
                      (update-in sched [guard t] #(inc (or % 0))))]
-    (reduce (partial update-one guard) schedules (range start end))))
+    (reduce update-one schedules (range start end))))
 
 (defn build-schedules [log]
   (let [iter (fn build-schedules-iter [[schedules guard start] entry]
-               (condp = (:type entry)
+               (case (:type entry)
                  :guard [schedules (:id entry) nil]
                  :sleep [schedules guard (:t entry)]
                  :wake [(update-schedule schedules guard start (:t entry))
