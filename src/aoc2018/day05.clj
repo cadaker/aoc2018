@@ -30,9 +30,6 @@
   (let [reacted (react (clojure.string/trim input))
         all-units (set (map #(Character/toUpperCase %) reacted))
         ;; min-key might apply its key func multiple times, so precompute the values
-        ;; instead of running the expensive function multiple times.
-        pruned (into {} (map (fn [unit]
-                               [unit (count (react (remove-unit reacted unit)))])
-                             all-units))
-        [_ best-length] (apply min-key val pruned)]
-    [(count reacted) best-length]))
+        ;; instead of running the expensive react calls multiple times.
+        pruned-lengths (map (comp count react (partial remove-unit reacted)) all-units)]
+    [(count reacted) (apply min pruned-lengths)]))
