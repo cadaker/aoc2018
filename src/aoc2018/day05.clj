@@ -20,6 +20,17 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn remove-unit [units unit-to-remove]
+  (remove #{(Character/toUpperCase unit-to-remove)
+            (Character/toLowerCase unit-to-remove)} units))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defsolution day05 [input]
-  [(count (react (clojure.string/trim input)))
-   0])
+  (let [reacted (react (clojure.string/trim input))
+        all-units (set (map #(Character/toUpperCase %) reacted))
+        best-unit (apply min-key (fn [unit]
+                                   (count (react (remove-unit reacted unit))))
+                         all-units)]
+    [(count reacted)
+     (count (react (remove-unit reacted best-unit)))]))

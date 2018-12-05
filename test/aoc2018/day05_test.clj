@@ -23,3 +23,7 @@
     (is (= "abAB" (react "abAB")))
     (is (= "aabAAB" (react "aabAAB")))
     ))
+
+(deftest remove-unit-test
+  (testing "remove-unit"
+    (is (= (seq "dbcCCBcCcD") (remove-unit "dabAcCaCBAcCcaDA" \a)))))
