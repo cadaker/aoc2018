@@ -29,8 +29,10 @@
 (defsolution day05 [input]
   (let [reacted (react (clojure.string/trim input))
         all-units (set (map #(Character/toUpperCase %) reacted))
-        best-unit (apply min-key (fn [unit]
-                                   (count (react (remove-unit reacted unit))))
-                         all-units)]
-    [(count reacted)
-     (count (react (remove-unit reacted best-unit)))]))
+        ;; min-key might apply its key func multiple times, so precompute the values
+        ;; instead of running the expensive function multiple times.
+        pruned (into {} (map (fn [unit]
+                               [unit (count (react (remove-unit reacted unit)))])
+                             all-units))
+        [_ best-length] (apply min-key val pruned)]
+    [(count reacted) best-length]))
