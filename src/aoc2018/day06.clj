@@ -30,8 +30,44 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn bounds [points]
+  {:left (apply min (map :x points))
+   :right (apply max (map :x points))
+   :bottom (apply max (map :y points))
+   :top (apply min (map :y points))})
+
+(defn manhattan-distance [p q]
+  (+ (abs (- (:x p) (:x q)))
+     (abs (- (:y p) (:y q)))))
+
+(defn unique-closest-point [p points]
+  (let [points* (remove p points)
+        points-with-dist (map (fn [p*] [p* (manhattan-distance p p*)]) points*)
+        [closest-point closest-dist] (apply min-key second points-with-dist)
+        closest-count (count (filter #{closest-dist} (map second points-with-dist)))]
+    (if (= 1 closest-count)
+      closest-point
+      nil)))
+
+(defn find-areas [all-points bounded-points]
+  (let [bounded-points-set (set bounded-points)
+        box (bounds all-points)
+        box-points (for [x (range (:left box) (inc (:right box)))
+                         y (range (:top box) (inc (:bottom box)))]
+                     {:x x :y y})]
+    (reduce (fn [areas xy]
+              (let [p (unique-closest-point xy all-points)]
+                (if (and p (contains? bounded-points-set p))
+                  (update areas p #(inc (or % 0)))
+                  areas)))
+            {}
+            box-points)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defsolution day06 [input]
   (let [points (->> input clojure.string/split-lines (map parse-point))
-        bounded-points (filter #(bounded-in? % points) points)]
-    [bounded-points
+        bounded-points (filter #(bounded-in? % points) points)
+        areas (find-areas points bounded-points)]
+    [(apply max (vals areas))
      0]))

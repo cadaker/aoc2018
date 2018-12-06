@@ -33,3 +33,26 @@
     (is (bounded-in? {:x 3 :y 4} points))
     (is (bounded-in? {:x 5 :y 5} points))
     (is (not (bounded-in? {:x 8 :y 9} points)))))
+
+(deftest bounds-test
+  (testing "bounds"
+    (is (= {:left 1 :right 4 :top 2 :bottom 5}
+           (bounds '({:x 1 :y 3}
+                     {:x 2 :y 5}
+                     {:x 2 :y 3}
+                     {:x 3 :y 2}
+                     {:x 4 :y 3}))))))
+
+(deftest unique-closest-point-test
+  (testing "unique-closest-point"
+    (is (= {:x 1 :y 1} (unique-closest-point {:x 0 :y 0} points)))
+    (is (= {:x 1 :y 1} (unique-closest-point {:x 2 :y 2} points)))
+    (is (= {:x 8 :y 3} (unique-closest-point {:x 6 :y 0} points)))
+    (is (= nil (unique-closest-point {:x 5 :y 0} points)))
+    ))
+
+(deftest find-areas-test
+  (testing "find-areas"
+    (is (= (find-areas points (filter #(bounded-in? % points) points))
+           {{:x 3 :y 4} 9
+            {:x 5 :y 5} 17}))))
