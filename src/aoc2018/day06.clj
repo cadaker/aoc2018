@@ -63,11 +63,26 @@
             {}
             box-points)))
 
+(defn within-distance? [p points max-distance]
+  (let [distances (map #(manhattan-distance % p) points)]
+    (< (reduce + distances) max-distance)))
+
+;; Hmm, can we really assume that all the relevant points will be inside the bbox?
+(defn find-area-of-within-region [all-points max-distance]
+  (let [box (bounds all-points)
+        candidate-points (for [x (range (:left box) (inc (:right box)))
+                               y (range (:top box) (inc (:bottom box)))
+                               :when (within-distance? {:x x :y y} all-points max-distance)]
+                           {:x x :y y})]
+    (count candidate-points)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(def max-distance 10000)
 
 (defsolution day06 [input]
   (let [points (->> input clojure.string/split-lines (map parse-point))
         bounded-points (filter #(bounded-in? % points) points)
         areas (find-areas points bounded-points)]
     [(apply max (vals areas))
-     0]))
+     (find-area-of-within-region points max-distance)]))

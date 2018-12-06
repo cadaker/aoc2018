@@ -56,3 +56,8 @@
     (is (= (find-areas points (filter #(bounded-in? % points) points))
            {{:x 3 :y 4} 9
             {:x 5 :y 5} 17}))))
+
+(deftest find-area-of-within-region-test
+  (testing "find-area-of-within-region"
+    (is (= (find-area-of-within-region points 32)
+           16))))
