@@ -1,9 +1,15 @@
 (ns aoc2018.day05
   (:use aoc2018.driver))
 
-(defn reaction? [^Character u1 ^Character u2]
+(defn ucase [^Character u]
+  (Character/toUpperCase u))
+
+(defn lcase [^Character u]
+  (Character/toLowerCase u))
+
+(defn reaction? [u1 u2]
   (and (not= u1 u2)
-       (= (Character/toUpperCase u1) (Character/toUpperCase u2))))
+       (= (ucase u1) (ucase u2))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -21,14 +27,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn remove-unit [units unit-to-remove]
-  (remove #{(Character/toUpperCase unit-to-remove)
-            (Character/toLowerCase unit-to-remove)} units))
+  (remove #{(ucase unit-to-remove) (lcase unit-to-remove)} units))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defsolution day05 [input]
   (let [reacted (react (clojure.string/trim input))
-        all-units (set (map #(Character/toUpperCase %) reacted))
+        all-units (set (map ucase reacted))
         ;; min-key might apply its key func multiple times, so precompute the values
         ;; instead of running the expensive react calls multiple times.
         pruned-lengths (map (comp count react (partial remove-unit reacted)) all-units)]
