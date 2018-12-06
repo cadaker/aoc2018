@@ -1,7 +1,7 @@
 (ns aoc2018.day05
   (:use aoc2018.driver))
 
-(defn reaction? [u1 u2]
+(defn reaction? [^Character u1 ^Character u2]
   (and (not= u1 u2)
        (= (Character/toUpperCase u1) (Character/toUpperCase u2))))
 
