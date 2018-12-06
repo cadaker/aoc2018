@@ -5,4 +5,5 @@
    aoc2018.day03
    aoc2018.day04
    aoc2018.day05
+   aoc2018.day06
    ))
