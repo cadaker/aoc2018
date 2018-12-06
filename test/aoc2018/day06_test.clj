@@ -10,11 +10,11 @@
   (testing "bounded-in-dir?"
     (is (bounded-in-dir? {:x 0 :y 0} {:x 1 :y 0} :right))
     (is (not (bounded-in-dir? {:x 0 :y 0} {:x 1 :y 0} :left)))
-    (is (not (bounded-in-dir? {:x 0 :y 0} {:x 1 :y 0} :up)))
     (is (not (bounded-in-dir? {:x 0 :y 0} {:x 1 :y 0} :down)))
+    (is (not (bounded-in-dir? {:x 0 :y 0} {:x 1 :y 0} :up)))
     (is (bounded-in-dir? {:x 0 :y 0} {:x 1 :y 1} :right))
-    (is (bounded-in-dir? {:x 0 :y 0} {:x 1 :y 1} :up))
-    (is (not (bounded-in-dir? {:x 0 :y 0} {:x 1 :y 1} :down)))
+    (is (bounded-in-dir? {:x 0 :y 0} {:x 1 :y 1} :down))
+    (is (not (bounded-in-dir? {:x 0 :y 0} {:x 1 :y 1} :up)))
     (is (not (bounded-in-dir? {:x 0 :y 0} {:x 1 :y 1} :left)))
     ))
 

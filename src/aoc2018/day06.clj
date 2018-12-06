@@ -16,11 +16,10 @@
   (let [dx (- (:x q) (:x p))
         dy (- (:y q) (:y p))]
     (case dir
-      :up    (and (pos? dy) (>= (abs dy) (abs dx)))
-      :down  (and (neg? dy) (>= (abs dy) (abs dx)))
+      :down  (and (pos? dy) (>= (abs dy) (abs dx)))
+      :up    (and (neg? dy) (>= (abs dy) (abs dx)))
       :right (and (pos? dx) (>= (abs dx) (abs dy)))
       :left  (and (neg? dx) (>= (abs dx) (abs dy))))))
-
 
 (defn bounded-in? [p points]
   (let [points* (remove p points)]
