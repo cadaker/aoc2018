@@ -10,7 +10,7 @@
 (defn all-nodes [graph]
   (sort (flatten (seq graph))))
 
-(defn remove-from-graph [node graph]
+(defn remove-from-graph [graph node]
   (let [graph' (dissoc graph node)]
     (reduce (fn [graph n]
               (update graph n #(remove #{node} %)))
@@ -28,7 +28,7 @@
           independent-nodes (filter #(has-no-dependencies? % graph) nodes)]
       (if (seq independent-nodes)
         (let [chosen-node (first (sort independent-nodes))]
-          (recur (remove-from-graph chosen-node graph)
+          (recur (remove-from-graph graph chosen-node)
                  (cons chosen-node ordering)))
         (reverse ordering)))))
 
@@ -83,8 +83,7 @@
        ;; If any jobs were done, remove them from our job list and start over
        (seq finished-jobs)
        (recur q
-              (reduce (fn [job-graph' job]
-                        (remove-from-graph job job-graph'))
+              (reduce remove-from-graph
                       job-graph
                       finished-jobs))
        ;; If we have finished all jobs, and no more to do, then we're done

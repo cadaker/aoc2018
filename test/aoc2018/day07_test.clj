@@ -15,8 +15,8 @@
 
 (deftest remove-from-graph-test
   (testing "remove-from-graph"
-    (is (= {"A" '()} (remove-from-graph "B" {"A" '("B")})))
-    (is (= {} (remove-from-graph "B" {"B" '("A")})))))
+    (is (= {"A" '()} (remove-from-graph {"A" '("B")} "B")))
+    (is (= {} (remove-from-graph {"B" '("A")} "B")))))
 
 (deftest has-no-dependencies?-test
   (testing "has-no-dependencies"
