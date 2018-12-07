@@ -22,10 +22,13 @@
 (defn has-no-dependencies? [graph node]
   (empty? (graph node)))
 
+(defn get-independent [graph]
+  (let [nodes (all-nodes graph)]
+    (sort (filter (partial has-no-dependencies? graph) nodes))))
+
 (defn topo-sort [graph-in]
   (loop [graph graph-in, ordering ()]
-    (let [nodes (all-nodes graph)
-          independent-nodes (filter #(has-no-dependencies? graph %) nodes)]
+    (let [independent-nodes (get-independent graph)]
       (if (seq independent-nodes)
         (let [chosen-node (first (sort independent-nodes))]
           (recur (remove-from-graph graph chosen-node)
@@ -75,8 +78,7 @@
           ;; Available jobs are jobs with no dependencies,
           ;; that are not being worked on already
           available-jobs (sort (apply disj
-                                      (set (filter #(has-no-dependencies? job-graph %)
-                                                   all-jobs))
+                                      (set (get-independent job-graph))
                                       (jobs-queued q)))]
 
       (cond
