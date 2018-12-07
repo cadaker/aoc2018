@@ -23,12 +23,12 @@
   (empty? (graph node)))
 
 (defn topo-sort [graph-in]
-  (loop [nodes (set (all-nodes graph-in)), graph graph-in, ordering ()]
-    (let [independent-nodes (filter #(has-no-dependencies? % graph) nodes)]
+  (loop [graph graph-in, ordering ()]
+    (let [nodes (set (all-nodes graph))
+          independent-nodes (filter #(has-no-dependencies? % graph) nodes)]
       (if (seq independent-nodes)
         (let [chosen-node (first (sort independent-nodes))]
-          (recur (disj nodes chosen-node)
-                 (remove-from-graph chosen-node graph)
+          (recur (remove-from-graph chosen-node graph)
                  (cons chosen-node ordering)))
         (reverse ordering)))))
 
