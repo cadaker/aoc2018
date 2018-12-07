@@ -44,7 +44,7 @@
   (empty? (:elems q)))
 
 (defn jobs-queued [q]
-  (set (keys (:elems q))))
+  (keys (:elems q)))
 
 (defn job-queue-size [q]
   (count (:elems q)))
@@ -75,11 +75,8 @@
          job-graph job-graph]
     (let [[q finished-jobs] (dequeue-done q')
           all-jobs (all-nodes job-graph)
-          ;; Available jobs are jobs with no dependencies,
-          ;; that are not being worked on already
-          available-jobs (sort (apply disj
-                                      (set (get-independent job-graph))
-                                      (jobs-queued q)))]
+          available-jobs (remove (set (jobs-queued q))
+                                 (get-independent job-graph))]
 
       (cond
        ;; If any jobs were done, remove them from our job list and start over
