@@ -48,3 +48,31 @@
     (is (= '("C" "A" "D" "B") (topo-sort {"A" '("C"), "B" '("D")})))
     (is (= '("C" "A" "B" "D" "F" "E") (topo-sort test-graph)))
     ))
+
+(deftest job-queue-test
+  (testing "job-queue"
+    (let [q (make-job-queue)
+          q1 (enqueue-job q "A" 1)
+          q1+ (work-job-queue q1)
+          q2 (enqueue-job q1 "B" 2)
+          q2+ (work-job-queue q2)
+          q2++ (work-job-queue q2+)]
+      (is (job-queue-empty? q))
+      (is (zero? (job-queue-size q)))
+      (is (= 1 (job-queue-size q1)))
+      (is (= 2 (job-queue-size q2)))
+      (is (empty? (second (dequeue-done q2))))
+      (is (= q2 (first (dequeue-done q2))))
+
+      (is (= '("A") (second (dequeue-done q1+))))
+      (is (= {:t 1, :elems {}} (first (dequeue-done q1+))))
+
+      (is (= '("A") (second (dequeue-done q2+))))
+      (is (= {:t 1, :elems {"B" 2}} (first (dequeue-done q2+))))
+      )))
+
+(deftest work-elves-test
+  (testing "work-elves"
+    (is (= 15 (work-elves test-graph
+                          2
+                          (partial job-time 0))))))
