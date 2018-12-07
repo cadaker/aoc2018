@@ -20,10 +20,10 @@
 
 (deftest has-no-dependencies?-test
   (testing "has-no-dependencies"
-    (is (has-no-dependencies? "C" {}))
-    (is (has-no-dependencies? "C" {"C" ()}))
-    (is (has-no-dependencies? "C" {"C" nil}))
-    (is (not (has-no-dependencies? "C" {"C" '("A")})))))
+    (is (has-no-dependencies? {} "C"))
+    (is (has-no-dependencies? {"C" ()} "C"))
+    (is (has-no-dependencies? {"C" nil} "C"))
+    (is (not (has-no-dependencies? {"C" '("A")} "C")))))
 
 (def test-graph
   {"A" '("C")
