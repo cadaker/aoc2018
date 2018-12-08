@@ -14,3 +14,9 @@
 (deftest meta-sum-test
   (testing "meta-sum"
     (is (= (meta-sum test-tree) 138))))
+
+(deftest value-of-test
+  (testing "value-of"
+    (is (= (value-of {:children (), :meta '(1 2)}) 3))
+    (is (= (value-of {:children '({:children (), :meta (17)}), :meta '(1)}) 17))
+    (is (= (value-of test-tree) 66))))

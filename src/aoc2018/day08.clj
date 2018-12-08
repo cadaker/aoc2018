@@ -21,8 +21,19 @@
     (+ (sum (:meta tree))
        (sum (map meta-sum (:children tree))))))
 
+(defn value-of [tree]
+  (if (empty? (:children tree))
+    (reduce + (:meta tree))
+    (let [child-values (for [ix (:meta tree)]
+                         (if-let [child (nth (:children tree) (dec ix) nil)]
+                           (value-of child)
+                           0))]
+      (reduce + child-values))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defsolution day08 [input]
-  (let [data (map #(Integer/valueOf %) (clojure.string/split (clojure.string/trim input) #" "))]
-    [(meta-sum (parse-tree data)) 0]))
+  (let [data (map #(Integer/valueOf %) (clojure.string/split (clojure.string/trim input) #" "))
+        tree (parse-tree data)]
+    [(meta-sum tree)
+     (value-of tree)]))
