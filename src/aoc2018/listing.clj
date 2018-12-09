@@ -8,4 +8,5 @@
    aoc2018.day06
    aoc2018.day07
    aoc2018.day08
+   aoc2018.day09
    ))
