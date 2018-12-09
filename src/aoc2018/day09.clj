@@ -69,4 +69,4 @@
 (defsolution day09 [input]
   (let [[player-count marble-count] (read-input input)]
     [(apply max (vals (play player-count marble-count)))
-     0]))
+     (apply max (vals (play player-count (* 100 marble-count))))]))
