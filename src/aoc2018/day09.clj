@@ -3,32 +3,39 @@
 
 (def starting-marbles '{:front (0) :back nil})
 
+(defn- other-dir-of [dir]
+  ({:front :back, :back :front} dir))
+
 (defn push-marble [marbles n]
   (update marbles :front #(cons n %)))
 
+(defn normalize-marbles [marbles dir]
+  (if (seq (marbles dir))
+    marbles
+    (let [other-dir (other-dir-of dir)]
+      {dir (reverse (marbles other-dir)), other-dir nil})))
+
 (defn current-marble [marbles]
-  (if (seq (:front marbles))
-    (first (:front marbles))
-    (last (:back marbles))))
+  (let [marbles' (normalize-marbles marbles :front)]
+    (first (:front marbles'))))
 
 (defn pop-current-marble [marbles]
-  (if (seq (:front marbles))
-    (update marbles :front rest)
-    (recur {:front (reverse (:back marbles)) :back nil})))
+  (let [marbles' (normalize-marbles marbles :front)]
+    (update marbles' :front rest)))
 
-(defn shift-marble [marbles from-key to-key]
-  (if (seq (from-key marbles))
-    (let [current (first (from-key marbles))
-          from' (rest (from-key marbles))
-          to' (cons current (to-key marbles))]
-      {from-key from' to-key to'})
-    (recur {from-key (reverse (to-key marbles)) to-key nil} from-key to-key)))
+(defn- shift-marble [marbles from-key]
+  (let [marbles' (normalize-marbles marbles from-key)
+        to-key (other-dir-of from-key)]
+    (let [current (first (from-key marbles'))
+          from' (rest (from-key marbles'))
+          to' (cons current (to-key marbles'))]
+      {from-key from' to-key to'})))
 
 (defn cw [marbles]
-  (shift-marble marbles :front :back))
+  (shift-marble marbles :front))
 
 (defn ccw [marbles]
-  (shift-marble marbles :back :front))
+  (shift-marble marbles :back))
 
 (defn marble-list [marbles]
   (concat (:front marbles) (reverse (:back marbles))))
