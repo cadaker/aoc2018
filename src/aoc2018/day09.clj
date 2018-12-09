@@ -66,7 +66,10 @@
   (let [[_ player-count marble-count] (re-matches input-pattern input)]
     [(Integer/valueOf player-count) (Integer/valueOf marble-count)]))
 
+(defn max-score [scores]
+  (apply max (vals scores)))
+
 (defsolution day09 [input]
   (let [[player-count marble-count] (read-input input)]
-    [(apply max (vals (play player-count marble-count)))
-     (apply max (vals (play player-count (* 100 marble-count))))]))
+    [(max-score (play player-count marble-count))
+     (max-score (play player-count (* 100 marble-count)))]))

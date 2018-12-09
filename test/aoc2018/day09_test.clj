@@ -45,9 +45,9 @@
 
 (deftest play-test
   (testing "play"
-    (is (= (apply max (vals (play 10 1618))) 8317))
-    (is (= (apply max (vals (play 13 7999))) 146373))
-    (is (= (apply max (vals (play 17 1104))) 2764))
-    (is (= (apply max (vals (play 21 6111))) 54718))
-    (is (= (apply max (vals (play 30 5807))) 37305))
+    (is (= (max-score (play 10 1618)) 8317))
+    (is (= (max-score (play 13 7999)) 146373))
+    (is (= (max-score (play 17 1104)) 2764))
+    (is (= (max-score (play 21 6111)) 54718))
+    (is (= (max-score (play 30 5807)) 37305))
     ))
