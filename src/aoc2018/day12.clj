@@ -34,7 +34,7 @@
         [trimmed-pots dropped] (trim-pots transformed-pots)]
     [trimmed-pots (+ start-index -2 dropped)]))
 
-(defn pot-positions [pots head-pos]
+(defn pot-positions [[pots head-pos]]
   (keep-indexed (fn [ix pot]
                   (when (= pot \#)
                     (+ ix head-pos)))
@@ -63,11 +63,10 @@
 (defsolution day12 [input]
   (let [[rules initial] (parse-input (clojure.string/split-lines input))
         generations (iterate (partial transform-pots rules) [initial 0])]
-    [(let [[pots head-pos] (nth generations 20)]
-       (reduce + (pot-positions pots head-pos)))
+    [(reduce + (pot-positions (nth generations 20)))
      (let [[cycle-start cycle-end] (find-cycle (map first generations))
            [equivalent-generation-no cycles-taken] (eliminate-cycle cycle-start cycle-end N)
            [pots head-pos] (nth generations equivalent-generation-no)
            cycle-head-movement (- (second (nth generations cycle-end))
                                   (second (nth generations cycle-start)))]
-       (reduce + (pot-positions pots (+ head-pos (* cycle-head-movement cycles-taken)))))]))
+       (reduce + (pot-positions [pots (+ head-pos (* cycle-head-movement cycles-taken))])))]))
