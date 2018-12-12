@@ -50,15 +50,15 @@
       [first-seen-index i]
       (recur (assoc seen (first xs) i) (rest xs) (inc i)))))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(def N 50000000000)
-
 (defn eliminate-cycle [cycle-start cycle-end n]
   (let [cycle-length (- cycle-end cycle-start)
         cycle-counts (quot (- n cycle-start) cycle-length)
         remainder (rem (- n cycle-start) cycle-length)]
     [(+ cycle-start remainder) cycle-counts]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(def N 50000000000)
 
 (defsolution day12 [input]
   (let [[rules initial] (parse-input (clojure.string/split-lines input))
@@ -68,5 +68,6 @@
            [equivalent-generation-no cycles-taken] (eliminate-cycle cycle-start cycle-end N)
            [pots head-pos] (nth generations equivalent-generation-no)
            cycle-head-movement (- (second (nth generations cycle-end))
-                                  (second (nth generations cycle-start)))]
-       (reduce + (pot-positions [pots (+ head-pos (* cycle-head-movement cycles-taken))])))]))
+                                  (second (nth generations cycle-start)))
+           total-head-movement (* cycle-head-movement cycles-taken)]
+       (reduce + (pot-positions [pots (+ head-pos total-head-movement)])))]))
