@@ -27,7 +27,7 @@
     [(drop head-count (drop-last tail-count pots))
      head-count]))
 
-(defn transform-pots [rules pots start-index]
+(defn transform-pots [rules [pots start-index]]
   (let [pots' (concat "...." pots "....")
         neighboured-pots (partition 5 1 pots')
         transformed-pots (map rules neighboured-pots)
@@ -62,9 +62,7 @@
 
 (defsolution day12 [input]
   (let [[rules initial] (parse-input (clojure.string/split-lines input))
-        generations (iterate (fn [[pots start-index]]
-                               (transform-pots rules pots start-index))
-                             [initial 0])]
+        generations (iterate (partial transform-pots rules) [initial 0])]
     [(let [[pots head-pos] (nth generations 20)]
        (reduce + (pot-positions pots head-pos)))
      (let [[cycle-start cycle-end] (find-cycle (map first generations))

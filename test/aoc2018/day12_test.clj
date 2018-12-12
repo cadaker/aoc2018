@@ -32,20 +32,17 @@
 
 (deftest transform-pots-test
   (testing "transform-pots"
-    (is (= (transform-pots (partial extend-rules {(vec "..#..") \#}) "#" 1)
+    (is (= (transform-pots (partial extend-rules {(vec "..#..") \#}) ["#" 1])
            [(seq "#") 1]))
-    (is (= (transform-pots (partial extend-rules {(vec "...#.") \#}) "#" 0)
+    (is (= (transform-pots (partial extend-rules {(vec "...#.") \#}) ["#" 0])
            [(seq "#") -1]))
-    (is (= (transform-pots (partial extend-rules {(vec ".#...") \#}) "#" 0)
+    (is (= (transform-pots (partial extend-rules {(vec ".#...") \#}) ["#" 0])
            [(seq "#") 1]))
         ))
 
 (deftest test-input
   (testing "test-input"
-    (let [all-generations (iterate (fn [[pots start-index]]
-                                     (transform-pots test-rules pots start-index))
-                                   [(seq test-initial-state) 0])
-          generations (take 21 all-generations)]
+    (let [generations (iterate (partial transform-pots test-rules) [(seq test-initial-state) 0])]
       (is (= (nth generations 0)
              [(seq "#..#.#..##......###...###") 0]))
       (is (= (nth generations 1)
