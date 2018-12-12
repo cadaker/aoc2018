@@ -34,17 +34,19 @@
         [trimmed-pots dropped] (trim-pots transformed-pots)]
     [trimmed-pots (+ start-index -2 dropped)]))
 
+(defn pot-positions [pots head-pos]
+  (keep-indexed (fn [ix pot]
+                  (when (= pot \#)
+                    (+ ix head-pos)))
+                pots))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defsolution day12 [input]
-  (let [[rules initial] (parse-input (clojure.string/split-lines input))]
-    [(let [[pots head-pos] (nth (iterate (fn [[pots start-index]]
-                                           (transform-pots rules pots start-index))
-                                         [initial 0])
-                                20)
-           pot-positions (keep-indexed (fn [ix pot]
-                                         (when (= pot \#)
-                                           (+ ix head-pos)))
-                                       pots)]
-       (reduce + pot-positions))
+  (let [[rules initial] (parse-input (clojure.string/split-lines input))
+        generations (iterate (fn [[pots start-index]]
+                               (transform-pots rules pots start-index))
+                             [initial 0])]
+    [(let [[pots head-pos] (nth generations 20)]
+       (reduce + (pot-positions pots head-pos)))
      0]))
