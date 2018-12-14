@@ -25,10 +25,29 @@
   (let [recipes (ffirst (drop-while #(< (count (first %)) (+ n 10)) steps))]
     (take 10 (drop n recipes))))
 
+(def indexes (iterate inc 0))
+
+(defn find-subseq-index [xs recipes]
+  (let [parts (partition (count xs) 1 recipes)
+        indexed-parts (map-indexed vector parts)
+        matching-parts (filter #(= xs (second %)) indexed-parts)]
+    (if (seq matching-parts)
+      (ffirst matching-parts)
+      nil)))
+
+(defn search-subseq [xs]
+  (loop [n 256, steps steps]
+    (println n)
+    (let [steps' (drop n steps)]
+      (if-let [ix (find-subseq-index xs (ffirst steps'))]
+        ix
+        (recur (* n 2) steps')))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def input 440231)
+(def input2 '(4 4 0 2 3 1))
 
 (defsolution day14 [_]
   [(steps-after input)
-   0])
+   (search-subseq input2)])
