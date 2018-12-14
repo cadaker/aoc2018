@@ -82,19 +82,36 @@
 (defn order-carts [carts]
   (sort-by (fn [[x y _ _]] [y x]) carts))
 
+(defn has-collision? [cart carts]
+  (let [coord (cart-coords cart)
+        coords (map cart-coords carts)]
+    ((set coords) coord)))
+
+(defn eliminate-carts [carts [x y]]
+  (filter (fn [[x' y' _ _]]
+            (not (and (= x x') (= y y'))))
+          carts))
+
 (defn step-carts [rails carts]
   (loop [carts-left (order-carts carts)
-         carts-done nil
-         collisions nil]
+         carts-done ()
+         collisions ()]
     (if (seq carts-left)
       (let [cart (first carts-left)
             [x y _ _] cart
             cart' (tick-cart cart (rails [x y]))
-            other-carts (concat (rest carts-left) carts-done)
-            new-collisions (cart-collisions cart' other-carts)]
-        (recur (rest carts-left)
-               (cons cart' carts-done)
-               (concat collisions new-collisions)))
+            collision-present (has-collision? cart' (concat (rest carts-left) carts-done))
+            carts-left' (if collision-present
+                          (eliminate-carts (rest carts-left) (cart-coords cart'))
+                          (rest carts-left))
+            carts-done' (if collision-present
+                          (eliminate-carts (cons cart' carts-done) (cart-coords cart'))
+                          (cons cart' carts-done))]
+        (recur carts-left'
+               carts-done'
+               (if collision-present
+                 (cons (cart-coords cart') collisions)
+                 collisions)))
       [(set carts-done) collisions])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -105,7 +122,13 @@
                        [carts ()])]
     (first (drop-while empty? (map second steps)))))
 
+(defn run-carts [rails carts]
+  (loop [carts carts]
+    (if (< (count carts) 2)
+      carts
+      (recur (first (step-carts rails carts))))))
+
 (defsolution day13 [input]
   (let [[rails carts] (parse-input input)]
     [(find-first-crashes rails carts)
-     0]))
+     (run-carts rails carts)]))

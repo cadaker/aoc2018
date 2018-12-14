@@ -50,5 +50,5 @@
       (is (= (nth steps 11) [#{[9 4 :down :right] [8 1 :left :straight]} ()]))
       (is (= (nth steps 12) [#{[8 4 :left :left] [7 1 :left :straight]} ()]))
       (is (= (nth steps 13) [#{[7 4 :left :left] [7 2 :down :straight]} ()]))
-      (is (= (nth steps 14) [#{[7 3 :up :left] [7 3 :down :right]} '([7 3])]))
+      (is (= (nth steps 14) [#{} '([7 3])]))
       )))
