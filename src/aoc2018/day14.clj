@@ -47,17 +47,21 @@
         ix
         (recur (* n 2) steps')))))
 
+(defn safe-subvec [xs start end]
+  (if (or (neg? start)
+          (> end (count xs)))
+    []
+    (subvec xs start end)))
+
 (defn search-subseq [xs]
   (loop [state [[3 7] 0 1]]
-    (if (< (count (first state)) (inc (count xs)))
-      (recur (step state))
-      (let [[recipes _ _] state
-            n (count recipes)
-            r1 (subvec recipes (- n (count xs)) n)
-            r2 (subvec recipes (- n (count xs) 1) (- n 1))]
-        (cond (= xs r1) (- n (count xs))
-              (= xs r2) (- n (count xs) 1)
-              :else (recur (step state)))))))
+    (let [[recipes _ _] state
+          n (count recipes)
+          r1 (safe-subvec recipes (- n (count xs)) n)
+          r2 (safe-subvec recipes (- n (count xs) 1) (- n 1))]
+      (cond (= xs r1) (- n (count xs))
+            (= xs r2) (- n (count xs) 1)
+            :else (recur (step state))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
