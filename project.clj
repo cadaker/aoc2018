@@ -3,6 +3,7 @@
   :url "https://github.com/cadaker/aoc2018"
   :license {:name "MIT License"
             :url "https://opensource.org/licenses/MIT"}
-  :dependencies [[org.clojure/clojure "1.8.0"]]
+  :dependencies [[org.clojure/clojure "1.8.0"]
+                 [com.taoensso/tufte "2.0.1"]]
   :main aoc2018.core
   :profiles {:uberjar {:aot :all}})
