@@ -40,18 +40,16 @@
 
 (defn bfs [cave units start-pos state update-state]
   (loop [queue (conj clojure.lang.PersistentQueue/EMPTY start-pos)
-         visited? #{}
+         visited? #{start-pos}
          state state]
     (if (empty? queue)
       state
       (let [pos (peek queue)
             queue' (pop queue)]
-        (if (visited? pos)
-          (recur queue' visited? state)
-          (let [steps (neighbours cave units pos)]
-            (recur (reduce conj queue' steps)
-                   (conj visited? pos)
-                   (update-state state pos steps))))))))
+        (let [steps (remove visited? (neighbours cave units pos))]
+          (recur (reduce conj queue' steps)
+                 (reduce conj visited? steps)
+                 (update-state state pos steps)))))))
 
 (defn distance-map [cave units pos]
   (let [update-distances (fn [distances pos steps]
