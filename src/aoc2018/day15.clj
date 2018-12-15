@@ -65,31 +65,61 @@
 (defn neighbour-target [cave units unit-type pos]
   (let [target? (fn [rc]
                   (and (units rc)
-                       (not= unit-type (:type (units rc)))))]
-    (first (filter target? (all-neighbours cave pos)))))
+                       (not= unit-type (:type (units rc)))))
+        all-targets (filter target? (all-neighbours cave pos))
+        lowest-hp (apply min HP (map #(:hp (units %)) all-targets))]
+    (first (filter #(= lowest-hp (:hp (units %))) all-targets))))
 
 (defn move-unit-to [units start-pos end-pos]
   (assoc (dissoc units start-pos) end-pos (units start-pos)))
 
+(def attack-power 3)
+
+(defn find-round-move [cave units unit-type pos]
+  (let [close-target (neighbour-target cave units unit-type pos)
+        pos' (find-move cave units unit-type pos)]
+    (cond close-target pos
+          pos' pos'
+          :else pos)))
+
+(defn attack-target [units target-pos]
+  (if (> (:hp (units target-pos)) attack-power)
+    (update-in units [target-pos :hp] #(- % attack-power))
+    (dissoc units target-pos)))
+
 (defn do-round [cave units]
   (loop [actions (sort-by key units)
          units units]
-    (if (empty? actions)
-      units
-      (let [[pos {unit-type :type}] (first actions)
-            close-target (neighbour-target cave units unit-type pos)
-            new-pos (find-move cave units unit-type pos)]
-        (cond close-target
-              ;; TODO: attack
-              (recur (rest actions) units)
-              ;; Move to a new spot
-              new-pos
-              (recur (rest actions) (move-unit-to units pos new-pos))
-              ;; No reachable target
-              :else
-              (recur (rest actions) units))))))
+    (cond (empty? actions) ; Are we done?
+          units
+          (nil? (units (ffirst actions))) ; Have we been killed
+          (recur (rest actions) units)
+          :else
+          (let [[pos {unit-type :type}] (first actions)
+                pos' (find-round-move cave units unit-type pos)
+                units' (move-unit-to units pos pos')
+                target (neighbour-target cave units' unit-type pos')]
+            (if target
+              (recur (rest actions) (attack-target units' target))
+              (recur (rest actions) units'))))))
+
+(defn factions-remaining [units]
+  (set (map :type (vals units))))
+
+(defn fight [cave units]
+  (loop [round-no 0
+         units units]
+    (if (= 1 (count (factions-remaining units)))
+      [round-no units]
+      (recur (inc round-no) (do-round cave units)))))
+
+(defn combat-outcome [[round-no units]]
+  (let [total-hp (reduce + (map :hp (vals units)))]
+    (* round-no total-hp)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defsolution day15 [input]
-  [0 0])
+  (let [[cave units] (read-map input)]
+    [(combat-outcome (fight cave units))
+      0]))

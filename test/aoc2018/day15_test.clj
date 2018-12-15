@@ -65,15 +65,68 @@
 (deftest movement-test
   (testing "movement-test"
     (let [rounds (iterate (partial do-round test-cave-2) test-units-2)
+          strip-hp (fn [units]
+                     (into {} (for [[pos info] units]
+                                [pos (dissoc info :hp)])))
+          G {:type :goblin}
+          E {:type :elf}]
+      (is (= (strip-hp (nth rounds 1))
+             {[1 2] G [1 6] G [2 4] G [3 4] E [3 7] G
+              [4 2] G [6 1] G [6 4] G [6 7] G}))
+      (is (= (strip-hp (nth rounds 2))
+             {[1 3] G [1 5] G [2 4] G [3 4] E [3 6] G
+              [3 2] G [5 1] G [5 4] G [5 7] G}))
+      (is (= (strip-hp (nth rounds 3))
+             {[2 3] G [2 4] G [2 5] G [3 4] E [3 5] G
+              [3 3] G [4 1] G [4 4] G [5 7] G}))
+      )))
+
+(let [test-input (read-map
+"#######
+#.G...#
+#...EG#
+#.#.#G#
+#..G#E#
+#.....#
+#######")]
+  (def test-cave-3 (first test-input))
+  (def test-units-3 (second test-input)))
+
+(deftest combat-test
+  (testing "combat"
+    (let [rounds (iterate (partial do-round test-cave-3) test-units-3)
           G (fn [hp] {:type :goblin :hp hp})
           E (fn [hp] {:type :elf :hp hp})]
       (is (= (nth rounds 1)
-             {[1 2] (G HP) [1 6] (G HP) [2 4] (G HP) [3 4] (E HP) [3 7] (G HP)
-              [4 2] (G HP) [6 1] (G HP) [6 4] (G HP) [6 7] (G HP)}))
+             {[1 3] (G 200) [2 4] (E 197) [2 5] (G 197) [3 3] (G 200) [3 5] (G 197) [4 5] (E 197)}))
       (is (= (nth rounds 2)
-             {[1 3] (G HP) [1 5] (G HP) [2 4] (G HP) [3 4] (E HP) [3 6] (G HP)
-              [3 2] (G HP) [5 1] (G HP) [5 4] (G HP) [5 7] (G HP)}))
-      (is (= (nth rounds 3)
-             {[2 3] (G HP) [2 4] (G HP) [2 5] (G HP) [3 4] (E HP) [3 5] (G HP)
-              [3 3] (G HP) [4 1] (G HP) [4 4] (G HP) [5 7] (G HP)}))
+             {[1 4] (G 200) [2 3] (G 200) [2 4] (E 188) [2 5] (G 194) [3 5] (G 194) [4 5] (E 194)}))
+      (is (= (nth rounds 23)
+             {[1 4] (G 200) [2 3] (G 200) [2 5] (G 131) [3 5] (G 131) [4 5] (E 131)}))
+      (is (= (nth rounds 24)
+             {[1 3] (G 200) [2 4] (G 131) [3 3] (G 200) [3 5] (G 128) [4 5] (E 128)}))
+      (is (= (nth rounds 25)
+             {[1 2] (G 200) [2 3] (G 131) [3 5] (G 125) [4 3] (G 200) [4 5] (E 125)}))
+      (is (= (nth rounds 26)
+             {[1 1] (G 200) [2 2] (G 131) [3 5] (G 122) [4 5] (E 122) [5 3] (G 200)}))
+      (is (= (nth rounds 27)
+             {[1 1] (G 200) [2 2] (G 131) [3 5] (G 119) [4 5] (E 119) [5 4] (G 200)}))
+      (is (= (nth rounds 28)
+             {[1 1] (G 200) [2 2] (G 131) [3 5] (G 116) [4 5] (E 113) [5 5] (G 200)}))
+      (is (= (nth rounds 47)
+             {[1 1] (G 200) [2 2] (G 131) [3 5] (G 59) [5 5] (G 200)}))
+      )))
+
+(deftest factions-remaining-test
+  (testing "factions-remaining"
+    (is (= #{:elf :goblin} (factions-remaining {[0 1] {:type :elf :hp HP}, [3 3] {:type :goblin :hp HP}})))
+    (is (= #{:elf} (factions-remaining {[0 1] {:type :elf :hp HP}})))))
+
+(deftest outcomes-test
+  (testing "outcomes"
+    (is (= 27730 (combat-outcome (fight test-cave-3 test-units-3))))
+    ;; (let [run (fn [input]
+    ;;             (let [[cave units] (read-map input)]
+    ;;               (combat-outcome (fight cave units))))]
+    ;;   (is (= 36334 (run "#######\n#G..#E#\n#E#E.E#\n#G.##.#\n#...#E#\n#...E.#\n#######\n")))
       )))
