@@ -51,35 +51,38 @@
                  (reduce conj visited? steps)
                  (update-state state pos steps)))))))
 
+(defn update-distance-map [distances pos steps]
+  (let [dist (inc (distances pos))]
+    (reduce (fn [distances step]
+              (if (nil? (distances step))
+                (assoc distances step dist)
+                (update distances step #(min % dist))))
+            distances
+            steps)))
+
 (defn distance-map [cave units pos]
-  (let [update-distances (fn [distances pos steps]
-                           (reduce (fn [distances step]
-                                     (let [dist (inc (distances pos))]
-                                       (if (nil? (distances step))
-                                         (assoc distances step dist)
-                                         (update distances step #(min % dist)))))
-                                   distances
-                                   steps))]
-    (bfs cave units pos {pos 0} update-distances)))
+  (bfs cave units pos {pos 0} update-distance-map))
+
+(defn update-initial-direction [initial-direction pos steps]
+  (into initial-direction (for [s steps
+                                :when (nil? (initial-direction s))]
+                            [s (or (initial-direction pos) s)])))
 
 (defn find-best-target [cave units unit-type pos]
-  (let [distances (distance-map cave units pos)
+  (let [[distances initial-directions] (bfs cave units pos
+                                            [{pos 0} {}]
+                                            (fn [[distances initial-directions] pos steps]
+                                              [(update-distance-map distances pos steps)
+                                               (update-initial-direction initial-directions pos steps)]))
         target? (target-positions cave units unit-type)
         reachable-targets (sort (filter target? (keys distances)))
         min-distance (if (seq reachable-targets)
                        (apply min (map distances reachable-targets))
                        nil)]
-    (first (filter #(= (distances %) min-distance) reachable-targets))))
+    [(first (filter #(= (distances %) min-distance) reachable-targets)) initial-directions]))
 
 (defn find-move [cave units unit-type pos]
-  (let [target (find-best-target cave units unit-type pos)
-        initial-directions (bfs cave units pos
-                                {}
-                                (fn [initial-direction pos steps]
-                                  (let [dir (initial-direction pos)]
-                                    (into initial-direction (for [s steps
-                                                                  :when (nil? (initial-direction s))]
-                                                              [s (or dir s)])))))]
+  (let [[target initial-directions] (find-best-target cave units unit-type pos)]
     (initial-directions target)))
 
 (defn neighbour-target [cave units unit-type pos]
