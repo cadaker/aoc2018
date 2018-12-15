@@ -84,11 +84,14 @@
 
 (defn attack-target [units target-pos]
   (if (> (:hp (units target-pos)) attack-power)
-    (update-in units [target-pos :hp] #(- % attack-power))
-    (dissoc units target-pos)))
+    [(update-in units [target-pos :hp] #(- % attack-power)) [-1000 -1000]]
+    [(dissoc units target-pos) target-pos]))
 
 (defn factions-remaining [units]
   (set (map :type (vals units))))
+
+(defn remove-unit-action [actions pos]
+  (remove #(= pos (first %)) actions))
 
 (defn do-round-with-stopped-flag [cave units]
   (loop [actions (sort-by key units)
@@ -97,9 +100,6 @@
     (cond (empty? actions) ; Are we done?
           [units stopped]
 
-          (nil? (units (ffirst actions))) ; Have we been killed
-          (recur (rest actions) units stopped)
-
           :else
           (let [stopped' (= 1 (count (factions-remaining units)))
                 [pos {unit-type :type}] (first actions)
@@ -107,7 +107,8 @@
                 units' (move-unit-to units pos pos')
                 target (neighbour-target cave units' unit-type pos')]
             (if target
-              (recur (rest actions) (attack-target units' target) stopped')
+              (let [[units'' killed] (attack-target units' target)]
+                (recur (remove-unit-action (rest actions) killed) units'' stopped'))
               (recur (rest actions) units' stopped'))))))
 
 (defn do-round [cave units]

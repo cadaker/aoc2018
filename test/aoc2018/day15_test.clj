@@ -134,3 +134,20 @@
       (is (= 28944 (run "#######\n#.E...#\n#.#..G#\n#.###.#\n#E#G#G#\n#...#G#\n#######\n")))
       (is (= 18740 (run "#########\n#G......#\n#.E.#...#\n#..##..G#\n#...##..#\n#...#...#\n#.G...G.#\n#.....G.#\n#########\n")))
       )))
+
+(deftest movement-corner-case-test
+  (testing "movement-corner-case"
+    ;; If the top goblin kills the left elf, and the second goblin takes its place.
+    (let [cave (first (read-map
+"#######
+#...G##
+#..GEE#
+#######"))
+          units {[1 4] {:type :goblin :hp HP}
+                 [2 3] {:type :goblin :hp HP}
+                 [2 4] {:type :elf :hp 1}
+                 [2 5] {:type :elf :hp HP}}]
+      (is (= (do-round cave units)
+             {[1 4] {:type :goblin :hp HP}
+              [2 4] {:type :goblin :hp 197}
+              [2 5] {:type :elf :hp 197}})))))
