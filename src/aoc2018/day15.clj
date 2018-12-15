@@ -87,35 +87,45 @@
     (update-in units [target-pos :hp] #(- % attack-power))
     (dissoc units target-pos)))
 
-(defn do-round [cave units]
+(defn factions-remaining [units]
+  (set (map :type (vals units))))
+
+(defn do-round-with-stopped-flag [cave units]
   (loop [actions (sort-by key units)
-         units units]
+         units units
+         stopped false]
     (cond (empty? actions) ; Are we done?
-          units
+          [units stopped]
+
           (nil? (units (ffirst actions))) ; Have we been killed
-          (recur (rest actions) units)
+          (recur (rest actions) units stopped)
+
           :else
-          (let [[pos {unit-type :type}] (first actions)
+          (let [stopped' (= 1 (count (factions-remaining units)))
+                [pos {unit-type :type}] (first actions)
                 pos' (find-round-move cave units unit-type pos)
                 units' (move-unit-to units pos pos')
                 target (neighbour-target cave units' unit-type pos')]
             (if target
-              (recur (rest actions) (attack-target units' target))
-              (recur (rest actions) units'))))))
+              (recur (rest actions) (attack-target units' target) stopped')
+              (recur (rest actions) units' stopped'))))))
 
-(defn factions-remaining [units]
-  (set (map :type (vals units))))
+(defn do-round [cave units]
+  (first (do-round-with-stopped-flag cave units)))
 
 (defn fight [cave units]
   (loop [round-no 0
-         units units]
+         units units
+         stopped false]
     (if (= 1 (count (factions-remaining units)))
-      [round-no units]
-      (recur (inc round-no) (do-round cave units)))))
+      [round-no units stopped]
+      (let [[units' stopped'] (do-round-with-stopped-flag cave units)]
+        (recur (inc round-no) units' stopped')))))
 
-(defn combat-outcome [[round-no units]]
-  (let [total-hp (reduce + (map :hp (vals units)))]
-    (* round-no total-hp)))
+(defn combat-outcome [[round-no units stopped]]
+  (let [total-hp (reduce + (map :hp (vals units)))
+        round-fudge (if stopped -1 0)]
+    (* (+ round-no round-fudge) total-hp)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

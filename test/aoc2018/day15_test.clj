@@ -125,8 +125,12 @@
 (deftest outcomes-test
   (testing "outcomes"
     (is (= 27730 (combat-outcome (fight test-cave-3 test-units-3))))
-    ;; (let [run (fn [input]
-    ;;             (let [[cave units] (read-map input)]
-    ;;               (combat-outcome (fight cave units))))]
-    ;;   (is (= 36334 (run "#######\n#G..#E#\n#E#E.E#\n#G.##.#\n#...#E#\n#...E.#\n#######\n")))
+    (let [run (fn [input]
+                (let [[cave units] (read-map input)]
+                  (combat-outcome (fight cave units))))]
+      (is (= 36334 (run "#######\n#G..#E#\n#E#E.E#\n#G.##.#\n#...#E#\n#...E.#\n#######\n")))
+      (is (= 39514 (run "#######\n#E..EG#\n#.#G.E#\n#E.##E#\n#G..#.#\n#..E#.#\n#######\n")))
+      (is (= 27755 (run "#######\n#E.G#.#\n#.#G..#\n#G.#.G#\n#G..#.#\n#...E.#\n#######\n")))
+      (is (= 28944 (run "#######\n#.E...#\n#.#..G#\n#.###.#\n#E#G#G#\n#...#G#\n#######\n")))
+      (is (= 18740 (run "#########\n#G......#\n#.E.#...#\n#..##..G#\n#...##..#\n#...#...#\n#.G...G.#\n#.....G.#\n#########\n")))
       )))
