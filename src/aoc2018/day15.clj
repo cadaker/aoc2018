@@ -155,7 +155,32 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn monotonic-find-first [func]
+  (let [upper-bound
+        (loop [n 1]
+          (if (func n)
+            n
+            (recur (* n 2))))]
+    (loop [lower 0
+           upper upper-bound]
+      (if (= lower upper)
+        lower
+        (let [mid (quot (+ upper lower) 2)]
+          (if (func mid)
+            (recur lower mid)
+            (recur (inc mid) upper)))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn count-elves [units]
+  (count (filter #{:elf} (map :type (vals units)))))
+
+(defn all-elves-survive? [cave units attack-power]
+  (let [[_ units' _] (fight cave units {:goblin 3 :elf attack-power})]
+    (= (count-elves units) (count-elves units'))))
+
 (defsolution day15 [input]
   (let [[cave units] (read-map input)]
     [(combat-outcome (fight cave units default-attack-powers))
-      0]))
+     (let [attack-power (monotonic-find-first (partial all-elves-survive? cave units))]
+       (combat-outcome (fight cave units {:goblin 3 :elf attack-power})))]))

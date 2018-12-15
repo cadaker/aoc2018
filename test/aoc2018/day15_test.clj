@@ -171,3 +171,9 @@
         (is (= (distances [4 4]) 1)))
       (is (= [1 1] (find-best-target cave units :goblin [4 3])))
       (is (= [4 2] (find-move cave units :goblin [4 3]))))))
+
+(deftest monotonic-find-first-test
+  (testing "monotonic-find-first"
+    (is (= 8 (monotonic-find-first #(> % 7))))
+    (is (= 17 (monotonic-find-first #(> % 16))))
+    (is (= 135 (monotonic-find-first #(> % 134))))))
