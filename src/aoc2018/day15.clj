@@ -115,21 +115,22 @@
 
 (defn do-round-with-stopped-flag [cave units attack-powers]
   (loop [actions (sort-by key units)
-         units units
-         stopped false]
+         units units]
     (cond (empty? actions) ; Are we done?
-          [units stopped]
+          [units false]
+
+          (= 1 (count (factions-remaining units)))
+          [units true]
 
           :else
-          (let [stopped' (= 1 (count (factions-remaining units)))
-                [pos {unit-type :type}] (first actions)
+          (let [[pos {unit-type :type}] (first actions)
                 pos' (find-round-move cave units unit-type pos)
                 units' (move-unit-to units pos pos')
                 target (neighbour-target cave units' unit-type pos')]
             (if target
               (let [[units'' killed] (attack-target units' target (attack-powers unit-type))]
-                (recur (remove-unit-action (rest actions) killed) units'' stopped'))
-              (recur (rest actions) units' stopped'))))))
+                (recur (remove-unit-action (rest actions) killed) units''))
+              (recur (rest actions) units'))))))
 
 (def default-attack-powers {:goblin 3 :elf 3})
 
