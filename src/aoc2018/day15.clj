@@ -95,8 +95,6 @@
 (defn move-unit-to [units start-pos end-pos]
   (assoc (dissoc units start-pos) end-pos (units start-pos)))
 
-(def attack-power 3)
-
 (defn find-round-move [cave units unit-type pos]
   (let [close-target (neighbour-target cave units unit-type pos)
         pos' (find-move cave units unit-type pos)]
@@ -104,7 +102,7 @@
           pos' pos'
           :else pos)))
 
-(defn attack-target [units target-pos]
+(defn attack-target [units target-pos attack-power]
   (if (> (:hp (units target-pos)) attack-power)
     [(update-in units [target-pos :hp] #(- % attack-power)) [-1000 -1000]]
     [(dissoc units target-pos) target-pos]))
@@ -115,7 +113,7 @@
 (defn remove-unit-action [actions pos]
   (remove #(= pos (first %)) actions))
 
-(defn do-round-with-stopped-flag [cave units]
+(defn do-round-with-stopped-flag [cave units attack-powers]
   (loop [actions (sort-by key units)
          units units
          stopped false]
@@ -129,20 +127,25 @@
                 units' (move-unit-to units pos pos')
                 target (neighbour-target cave units' unit-type pos')]
             (if target
-              (let [[units'' killed] (attack-target units' target)]
+              (let [[units'' killed] (attack-target units' target (attack-powers unit-type))]
                 (recur (remove-unit-action (rest actions) killed) units'' stopped'))
               (recur (rest actions) units' stopped'))))))
 
-(defn do-round [cave units]
-  (first (do-round-with-stopped-flag cave units)))
+(def default-attack-powers {:goblin 3 :elf 3})
 
-(defn fight [cave units]
+(defn do-round
+  ([cave units attack-powers]
+     (first (do-round-with-stopped-flag cave units attack-powers)))
+  ([cave units]
+     (do-round cave units default-attack-powers)))
+
+(defn fight [cave units attack-powers]
   (loop [round-no 0
          units units
          stopped false]
     (if (= 1 (count (factions-remaining units)))
       [round-no units stopped]
-      (let [[units' stopped'] (do-round-with-stopped-flag cave units)]
+      (let [[units' stopped'] (do-round-with-stopped-flag cave units attack-powers)]
         (recur (inc round-no) units' stopped')))))
 
 (defn combat-outcome [[round-no units stopped]]
@@ -154,5 +157,5 @@
 
 (defsolution day15 [input]
   (let [[cave units] (read-map input)]
-    [(combat-outcome (fight cave units))
+    [(combat-outcome (fight cave units default-attack-powers))
       0]))
