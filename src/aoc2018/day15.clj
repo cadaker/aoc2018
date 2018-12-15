@@ -141,6 +141,16 @@
   ([cave units]
      (do-round cave units default-attack-powers)))
 
+(defn print-state [cave units]
+  (let [rows (map first (keys cave))
+        cols (map second (keys cave))]
+    (dotimes [r (inc (apply max rows))]
+      (dotimes [c (inc (apply max cols))]
+        (if-let [unit (units [r c])]
+          (print ({:goblin \G :elf \E} (:type unit)))
+          (print (cave [r c]))))
+      (println))))
+
 (defn fight [cave units attack-powers]
   (loop [round-no 0
          units units
