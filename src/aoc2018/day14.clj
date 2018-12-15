@@ -2,7 +2,11 @@
   (:require clojure.set)
   (:use aoc2018.driver))
 
-(defn digits-of [n]
+(def digits-of
+  {0 [0] 1 [1] 2 [2] 3 [3] 4 [4] 5 [5] 6 [6] 7 [7] 8 [8] 9 [9] 10 [1 0]
+   11 [1 1] 12 [1 2] 13 [1 3] 14 [1 4] 15 [1 5] 16 [1 6] 17 [1 7] 18 [1 8]})
+
+(defn digits-of* [n]
   (if (zero? n)
     (list 0)
     (loop [n n, digits ()]
@@ -46,7 +50,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def input 440231)
-(def input2 '(4 4 0 2 3 1))
+(def input2 [4 4 0 2 3 1])
 
 (defsolution day14 [_]
   [(steps-after input)
