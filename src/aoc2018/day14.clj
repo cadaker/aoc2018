@@ -39,13 +39,25 @@
       (ffirst matching-parts)
       nil)))
 
-(defn search-subseq [xs]
+(defn search-subseq* [xs]
   (loop [n 256, steps steps]
     (println n)
     (let [steps' (drop n steps)]
       (if-let [ix (find-subseq-index xs (ffirst steps'))]
         ix
         (recur (* n 2) steps')))))
+
+(defn search-subseq [xs]
+  (loop [state [[3 7] 0 1]]
+    (if (< (count (first state)) (inc (count xs)))
+      (recur (step state))
+      (let [[recipes _ _] state
+            n (count recipes)
+            r1 (subvec recipes (- n (count xs)) n)
+            r2 (subvec recipes (- n (count xs) 1) (- n 1))]
+        (cond (= xs r1) (- n (count xs))
+              (= xs r2) (- n (count xs) 1)
+              :else (recur (step state)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
