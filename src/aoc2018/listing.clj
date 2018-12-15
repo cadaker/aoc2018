@@ -14,4 +14,5 @@
    aoc2018.day12
    aoc2018.day13
    aoc2018.day14
+   aoc2018.day15
    ))
