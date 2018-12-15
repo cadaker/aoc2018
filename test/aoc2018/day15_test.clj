@@ -33,7 +33,7 @@
 
 (deftest target-positions-test
   (testing "target-positions"
-    (is (= (target-positions test-cave-1 test-units-1 :elf [1 1])
+    (is (= (target-positions test-cave-1 test-units-1 :elf)
            #{[1 3] [1 5] [2 2] [2 5] [3 1] [3 3]}))))
 
 (deftest find-move-test
@@ -151,3 +151,23 @@
              {[1 4] {:type :goblin :hp HP}
               [2 4] {:type :goblin :hp 197}
               [2 5] {:type :elf :hp 197}})))))
+
+(deftest pathing-corner-case-test
+  (testing "pathing-corner-case"
+    ;; First find the spot to go, then find the path. Don't just find a path
+    (let [[cave units] (read-map
+"#######
+#.E...#
+#.##..#
+#.#...#
+#..G..#
+#######
+")]
+      (is (= (target-positions cave units :goblin) #{[1 1] [1 3]}))
+      (let [distances (distance-map cave units [4 3])]
+        (is (= (distances [1 1]) 5))
+        (is (= (distances [1 3]) 5))
+        (is (= (distances [4 2]) 1))
+        (is (= (distances [4 4]) 1)))
+      (is (= [1 1] (find-best-target cave units :goblin [4 3])))
+      (is (= [4 2] (find-move cave units :goblin [4 3]))))))

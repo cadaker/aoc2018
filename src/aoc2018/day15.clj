@@ -32,35 +32,57 @@
   "Return the in-range neighbour coordinates of the point, in reading order."
   (filter (partial in-range? cave units) (all-neighbours cave pos)))
 
-(defn target-positions [cave units unit-type [row col]]
-  "Return a set of all the positions where a unit of type unit-type at [row col] would want to go."
+(defn target-positions [cave units unit-type]
+  "Return a set of all the positions where a unit of type unit-type would want to go."
   (let [target-unit-positions (for [e units :when (not= (:type (val e)) unit-type)]
                                 (key e))]
     (set (mapcat (partial neighbours cave units) target-unit-positions))))
 
-(defn find-move [cave units unit-type [row col]]
-  (let [target? (target-positions cave units unit-type [row col])
-        start-steps (neighbours cave units [row col])]
-    (loop [queue (reduce conj clojure.lang.PersistentQueue/EMPTY start-steps)
-           initial-direction (into {} (for [rc start-steps] [rc rc]))
-           visited? #{[row col]}]
-      (if (empty? queue)
-        nil
-        (let [[r c] (peek queue)
-              queue' (pop queue)]
-          (cond (target? [r c])
-                (initial-direction [r c])
+(defn bfs [cave units start-pos state update-state]
+  (loop [queue (conj clojure.lang.PersistentQueue/EMPTY start-pos)
+         visited? #{}
+         state state]
+    (if (empty? queue)
+      state
+      (let [pos (peek queue)
+            queue' (pop queue)]
+        (if (visited? pos)
+          (recur queue' visited? state)
+          (let [steps (neighbours cave units pos)]
+            (recur (reduce conj queue' steps)
+                   (conj visited? pos)
+                   (update-state state pos steps))))))))
 
-                (visited? [r c])
-                (recur queue' initial-direction visited?)
+(defn distance-map [cave units pos]
+  (let [update-distances (fn [distances pos steps]
+                           (reduce (fn [distances step]
+                                     (let [dist (inc (distances pos))]
+                                       (if (nil? (distances step))
+                                         (assoc distances step dist)
+                                         (update distances step #(min % dist)))))
+                                   distances
+                                   steps))]
+    (bfs cave units pos {pos 0} update-distances)))
 
-                :else
-                (let [new-steps (neighbours cave units [r c])]
-                  (recur (reduce conj queue' new-steps)
-                         (into initial-direction (for [s new-steps
-                                                       :when (nil? (initial-direction s))]
-                                                   [s (initial-direction [r c])]))
-                         (conj visited? [r c])))))))))
+(defn find-best-target [cave units unit-type pos]
+  (let [distances (distance-map cave units pos)
+        target? (target-positions cave units unit-type)
+        reachable-targets (sort (filter target? (keys distances)))
+        min-distance (if (seq reachable-targets)
+                       (apply min (map distances reachable-targets))
+                       nil)]
+    (first (filter #(= (distances %) min-distance) reachable-targets))))
+
+(defn find-move [cave units unit-type pos]
+  (let [target (find-best-target cave units unit-type pos)
+        initial-directions (bfs cave units pos
+                                {}
+                                (fn [initial-direction pos steps]
+                                  (let [dir (initial-direction pos)]
+                                    (into initial-direction (for [s steps
+                                                                  :when (nil? (initial-direction s))]
+                                                              [s (or dir s)])))))]
+    (initial-directions target)))
 
 (defn neighbour-target [cave units unit-type pos]
   (let [target? (fn [rc]
