@@ -91,7 +91,38 @@
                          (= vm-post (apply func vm-pre operands)))
                        instructions))))
 
+(defn constrain-op [opcodes entry]
+  (let [possible (possible-instructions entry)
+        code (first (:op entry))]
+    (update opcodes code (partial clojure.set/intersection (set possible)))))
+
+(defn eliminate-op [opcodes [exclude-code op]]
+  (reduce (fn [opcodes [code ops]]
+            (if (not= code exclude-code)
+              (assoc opcodes code (disj ops op))
+              opcodes))
+          opcodes
+          opcodes))
+
+(defn eliminate-codes [opcodes]
+  (let [singles (for [[code ops] opcodes :when (= 1 (count ops))]
+                  [code (first ops)])
+        opcodes' (reduce eliminate-op opcodes singles)]
+    (if (= opcodes opcodes')
+      opcodes
+      (recur opcodes'))))
+
+(defn finalize-opcodes [opcodes]
+  (if (every? #(= 1 (count %)) (vals opcodes))
+    (into {} (for [[code ops] opcodes] [code (first ops)]))
+    nil))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(def opcode-init
+  (let [all-instrs (set (keys instructions))]
+    (into {} (for [code (range (count all-instrs))]
+               [code all-instrs]))))
 
 (defsolution day16 [input]
   (let [[part1 part2] (parse-input input)]
@@ -99,4 +130,6 @@
           (map possible-instructions)
           (filter #(>= (count %) 3))
           count)
-     0]))
+     (let [filtered (reduce constrain-op opcode-init part1)
+           opcodes (finalize-opcodes (eliminate-codes filtered))]
+       opcodes)]))
