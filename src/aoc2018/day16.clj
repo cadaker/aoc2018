@@ -76,10 +76,18 @@
      :op   (vec (map (partial nth-value match) '(5 6 7 8)))
      :post (vec (map (partial nth-value match) '(9 10 11 12)))}))
 
+(def pattern2 #"(\d+) (\d+) (\d+) (\d+)")
+
+(defn parse-entry-2 [input]
+  (let [match (re-matches pattern2 input)]
+    (vec (map (partial nth-value match) '(1 2 3 4)))))
+
 (defn parse-input [input]
   (let [[part1 part2] (clojure.string/split input #"\n\n\n\n")
-        entries1 (clojure.string/split part1 #"\n\n")]
-    [(map parse-entry-1 entries1) nil]))
+        entries1 (clojure.string/split part1 #"\n\n")
+        entries2 (clojure.string/split part2 #"\n")]
+    [(map parse-entry-1 entries1)
+     (map parse-entry-2 entries2)]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -117,6 +125,15 @@
     (into {} (for [[code ops] opcodes] [code (first ops)]))
     nil))
 
+(defn run-instr [opcodes vm codes]
+  (let [instr (instructions (opcodes (first codes)))]
+    (apply instr vm (rest codes))))
+
+(def init-vm {:regs [0 0 0 0]})
+
+(defn run-program [opcodes program]
+  (reduce (partial run-instr opcodes) init-vm program))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def opcode-init
@@ -132,4 +149,4 @@
           count)
      (let [filtered (reduce constrain-op opcode-init part1)
            opcodes (finalize-opcodes (eliminate-codes filtered))]
-       opcodes)]))
+       (run-program opcodes part2))]))
