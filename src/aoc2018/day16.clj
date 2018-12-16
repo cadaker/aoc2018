@@ -149,4 +149,4 @@
           count)
      (let [filtered (reduce constrain-op opcode-init part1)
            opcodes (finalize-opcodes (eliminate-codes filtered))]
-       (run-program opcodes part2))]))
+       (first (:regs (run-program opcodes part2))))]))
