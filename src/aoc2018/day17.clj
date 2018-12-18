@@ -105,9 +105,12 @@
 (defn sum-water [grid]
   (count (filter #{\~ \|} (vals grid))))
 
+(defn sum-retained-water [grid]
+  (count (filter #{\~} (vals grid))))
+
 (defsolution day17 [input]
   (let [points (parse-input input)
         grid (make-grid points)
         painted-grid (paint-all-water grid [(starting-point grid)])]
     [(sum-water painted-grid)
-     0]))
+     (sum-retained-water painted-grid)]))
