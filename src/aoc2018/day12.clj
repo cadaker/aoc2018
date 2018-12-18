@@ -1,5 +1,6 @@
 (ns aoc2018.day12
-  (:use aoc2018.driver))
+  (:use aoc2018.driver)
+  (:require [aoc2018.cycle :as cycle]))
 
 (def initial-pattern #"initial state: ([#.]+)")
 (def rule-pattern #"([.#]{5}) => ([#.])")
@@ -42,30 +43,14 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn find-cycle [xs']
-  (loop [seen {}
-         xs xs'
-         i 0]
-    (if-let [first-seen-index (seen (first xs))]
-      [first-seen-index i]
-      (recur (assoc seen (first xs) i) (rest xs) (inc i)))))
-
-(defn eliminate-cycle [cycle-start cycle-end n]
-  (let [cycle-length (- cycle-end cycle-start)
-        cycle-counts (quot (- n cycle-start) cycle-length)
-        remainder (rem (- n cycle-start) cycle-length)]
-    [(+ cycle-start remainder) cycle-counts]))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 (def N 50000000000)
 
 (defsolution day12 [input]
   (let [[rules initial] (parse-input (clojure.string/split-lines input))
         generations (iterate (partial transform-pots rules) [initial 0])]
     [(reduce + (pot-positions (nth generations 20)))
-     (let [[cycle-start cycle-end] (find-cycle (map first generations))
-           [equivalent-generation-no cycles-taken] (eliminate-cycle cycle-start cycle-end N)
+     (let [[cycle-start cycle-end] (cycle/find-cycle (map first generations))
+           [equivalent-generation-no cycles-taken] (cycle/eliminate-cycle cycle-start cycle-end N)
            [pots head-pos] (nth generations equivalent-generation-no)
            cycle-head-movement (- (second (nth generations cycle-end))
                                   (second (nth generations cycle-start)))

@@ -1,5 +1,6 @@
 (ns aoc2018.day18
-  (:use aoc2018.driver))
+  (:use aoc2018.driver)
+  (:require [aoc2018.cycle :as cycle]))
 
 (defn make-lookup [input]
   (let [lines (clojure.string/split-lines input)
@@ -38,20 +39,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn find-cycle [xs']
-  (loop [seen {}
-         xs xs'
-         i 0]
-    (if-let [first-seen-index (seen (first xs))]
-      [first-seen-index i]
-      (recur (assoc seen (first xs) i) (rest xs) (inc i)))))
-
-(defn eliminate-cycle [cycle-start cycle-end n]
-  (let [cycle-length (- cycle-end cycle-start)
-        cycle-counts (quot (- n cycle-start) cycle-length)
-        remainder (rem (- n cycle-start) cycle-length)]
-    [(+ cycle-start remainder) cycle-counts]))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn resource-value [grid]
@@ -64,6 +51,6 @@
   (let [grid (make-lookup input)
         grids (iterate evolve grid)]
     [(resource-value (nth grids 10))
-     (let [[cycle-start cycle-end] (find-cycle grids)
-           [iter-no _] (eliminate-cycle cycle-start cycle-end iters)]
+     (let [[cycle-start cycle-end] (cycle/find-cycle grids)
+           [iter-no _] (cycle/eliminate-cycle cycle-start cycle-end iters)]
        (resource-value (nth grids iter-no)))]))

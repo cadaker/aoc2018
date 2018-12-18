@@ -1,5 +1,6 @@
 (ns aoc2018.day12_test
   (:require [clojure.test :refer :all])
+  (:require [aoc2018.cycle :as cycle])
   (:use [aoc2018.day12]))
 
 (def test-rules-base
@@ -89,17 +90,17 @@
 
 (deftest find-cycle-test
   (testing "find-cycle"
-    (is (= [0 1] (find-cycle '(0 0 0 0 0 0))))
-    (is (= [1 2] (find-cycle '(0 1 1 0 0 0))))
-    (is (= [1 5] (find-cycle '(0 1 2 3 4 1))))
+    (is (= [0 1] (cycle/find-cycle '(0 0 0 0 0 0))))
+    (is (= [1 2] (cycle/find-cycle '(0 1 1 0 0 0))))
+    (is (= [1 5] (cycle/find-cycle '(0 1 2 3 4 1))))
     ))
 
 (deftest eliminate-cycle-test
   (testing "eliminate-cycle"
-    (is (= [0 10] (eliminate-cycle 0 1 10)))
-    (is (= [0 5] (eliminate-cycle 0 2 10)))
-    (is (= [2 4] (eliminate-cycle 1 3 10)))
-    (is (= [1 3] (eliminate-cycle 0 3 10)))
-    (is (= [1 3] (eliminate-cycle 1 4 10)))
-    (is (= [3 12] (eliminate-cycle 3 4 15)))
+    (is (= [0 10] (cycle/eliminate-cycle 0 1 10)))
+    (is (= [0 5] (cycle/eliminate-cycle 0 2 10)))
+    (is (= [2 4] (cycle/eliminate-cycle 1 3 10)))
+    (is (= [1 3] (cycle/eliminate-cycle 0 3 10)))
+    (is (= [1 3] (cycle/eliminate-cycle 1 4 10)))
+    (is (= [3 12] (cycle/eliminate-cycle 3 4 15)))
     ))
