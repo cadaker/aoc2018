@@ -93,8 +93,8 @@
       [vm' (inc (get-in vm' [:regs ip-reg]))])
     nil))
 
-(defn run-program [ip-reg instrs]
-  (loop [vm {:regs [0 0 0 0 0 0]}
+(defn run-program [ip-reg instrs start-vm]
+  (loop [vm start-vm
          ip 0]
     (if-let [result (step-program ip-reg instrs vm ip)]
       (let [[vm' ip'] result]
@@ -103,7 +103,9 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(def vm-0 {:regs [0 0 0 0 0 0]})
+
 (defsolution day19 [input]
   (let [[ip-reg instrs] (parse-input input)]
-    [(run-program ip-reg instrs)
+    [(get-in (run-program ip-reg instrs vm-0) [0 :regs 0])
      0]))
