@@ -103,9 +103,23 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(def A2-part-1 (+ (* 4 19 11) (* 6 22) 9))
+
+(def A2-part-2 (+ A2-part-1 (* (+ (* 27 28) 29) 30 14 32)))
+
+(defn simplified-program [n]
+  (reduce + (for [divisor (range 1 (inc n))
+                  :when (zero? (rem n divisor))]
+              divisor)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (def vm-0 {:regs [0 0 0 0 0 0]})
+(def vm-1 {:regs [1 0 0 0 0 0]})
 
 (defsolution day19 [input]
-  (let [[ip-reg instrs] (parse-input input)]
-    [(get-in (run-program ip-reg instrs vm-0) [0 :regs 0])
-     0]))
+  ;; (let [[ip-reg instrs] (parse-input input)]
+  ;;   [(get-in (run-program ip-reg instrs vm-0) [0 :regs 0])
+  ;;    (get-in (run-program ip-reg instrs vm-1) [0 :regs 0])])
+  [(simplified-program A2-part-1)
+   (simplified-program A2-part-2)])
