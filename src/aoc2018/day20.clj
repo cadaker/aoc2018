@@ -76,7 +76,23 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn path-lengths-from [graph start]
+  (loop [queue (conj clojure.lang.PersistentQueue/EMPTY start)
+         visited? #{start}
+         distances {start 0}]
+    (if (empty? queue)
+      distances
+      (let [neighbours (remove visited? (graph (peek queue)))]
+        (recur (reduce conj (pop queue) neighbours)
+               (reduce conj visited? neighbours)
+               (into distances (map #(vector % (inc (distances (peek queue)))) neighbours)))))))
+
+(defn max-length [path-lengths]
+  (apply max (vals path-lengths)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defsolution day20 [input]
   (let [graph (build-graph input)]
-    [(println (format-graph graph))
+    [(max-length (path-lengths-from graph [0 0]))
      0]))

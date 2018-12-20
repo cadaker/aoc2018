@@ -50,3 +50,10 @@
   (testing "input"
     (is (= (format-graph (build-graph test-input-1)) test-map-1))
     (is (= (format-graph (build-graph test-input-2)) test-map-2))))
+
+(deftest max-length-test
+  (testing "max-length"
+    (let [get-max-length (fn [input] (-> input build-graph (path-lengths-from [0 0]) max-length))]
+      (is (= 23 (get-max-length "^ESSWWN(E|NNENN(EESS(WNSE|)SSS|WWWSSSSE(SW|NNNE)))$")))
+      (is (= 31 (get-max-length "^WSSEESWWWNW(S|NENNEEEENN(ESSSSW(NWSW|SSEN)|WSWWN(E|WWS(E|SS))))$")))
+      )))
