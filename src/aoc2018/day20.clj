@@ -93,6 +93,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defsolution day20 [input]
-  (let [graph (build-graph input)]
-    [(max-length (path-lengths-from graph [0 0]))
-     0]))
+  (let [graph (build-graph input)
+        lengths (path-lengths-from graph [0 0])]
+    [(max-length lengths)
+     (count (filter #(>= % 1000) (vals lengths)))]))
