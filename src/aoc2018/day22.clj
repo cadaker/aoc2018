@@ -81,7 +81,8 @@
                    :let [erosion (second (erosion-at depth target-xy erosion-cache' xy'))]
                    :when (movable? equip (cave-type erosion))]
                [1 [equip xy']])
-             (for [equip' equips]
+             (for [equip' equips
+                   :when (movable? equip' (cave-type (second (erosion-at depth target-xy erosion-cache' xy))))]
                [7 [equip' xy]]))]))
 
 (defn dijkstra [depth target-xy]
