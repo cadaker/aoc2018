@@ -33,3 +33,15 @@
 (deftest total-risk-test
   (testing "total-risk"
     (is (= 114 (total-risk (compute-erosions 510 {:x 10 :y 10} 10 10))))))
+
+(deftest erosion-at-test
+  (testing "erosion-at"
+    (let [tgt {:x 10 :y 10}]
+      (let [[cache _] (erosion-at 510 tgt {} {:x 10 :y 10})
+            erosions (compute-erosions 510 tgt 10 10)]
+        (is (every? true? (for [[xy e] cache]
+                            (= e (erosions xy)))))))))
+
+(deftest dijkstra-test
+  (testing "dijkstra"
+    (is (= 45 (dijkstra 510 {:x 10 :y 10})))))
