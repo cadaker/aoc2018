@@ -43,21 +43,6 @@
                 :when (overlaps r0 r1)]
             [r0 r1])))
 
-(defn clique? [graph node-set]
-  (every? (partial clojure.set/subset? node-set) (map graph node-set)))
-
-(defn mh-expand-step [acc coords n]
-  (if (= 1 (count coords))
-    (list (conj acc (+ n (first coords))))
-    (apply concat (for [i (range (inc n))]
-                    (mh-expand-step (conj acc (+ (first coords) i))
-                                    (rest coords)
-                                    (- n i))))))
-
-(defn mh-expand [xyz]
-  (let [integers (iterate inc 0)]
-    (mapcat (partial mh-expand-step [] xyz) integers)))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def clique-size 980) ;; Found by inspection of neighbour counts.
