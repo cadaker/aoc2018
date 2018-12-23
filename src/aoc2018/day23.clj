@@ -43,25 +43,34 @@
                 :when (overlaps r0 r1)]
             [r0 r1])))
 
+(defn neighbourhood [graph node]
+  (disj (graph node) node))
+
+(defn do-bron-kerbosch [graph acc chosen possible excluded]
+  (if (and (empty? possible) (empty? excluded))
+    (conj acc chosen)
+    (loop [acc acc, possible possible, excluded excluded]
+      (if (seq possible)
+        (let [node (first possible)
+              chosen' (conj chosen node)
+              possible' (clojure.set/intersection possible (neighbourhood graph node))
+              excluded' (clojure.set/intersection excluded (neighbourhood graph node))]
+          (do-bron-kerbosch graph acc chosen' possible' excluded'))
+        acc))))
+
+(defn bron-kerbosch [graph]
+  (do-bron-kerbosch graph [] #{} (set (keys graph)) #{}))
+
 (defn constraint [region]
   (let [[[x y z] r] region]
     (+ x y z (- r))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(def clique-size 980) ;; Found by inspection of neighbour counts.
-
-(defn get-big-subgraph [graph neighbour-limit]
-  (apply dissoc graph (filter (fn [node] (< (count (graph node)) neighbour-limit)) (keys graph))))
-
-(defn complete-intersection [graph]
-  (apply clojure.set/intersection (vals graph)))
-
 (defsolution day23 [input]
   (let [regions (parse-input input)]
     [(let [biggest (biggest-region regions)]
        (count (regions-inside regions biggest)))
-     (let [total-graph (overlap-graph regions)
-           graph (get-big-subgraph total-graph clique-size)
-           clique (complete-intersection graph)]
+     (let [graph (overlap-graph regions)
+           clique (set (apply max-key count (bron-kerbosch graph)))]
        (apply max (map constraint clique)))]))
