@@ -49,16 +49,21 @@
 (defn do-bron-kerbosch [graph acc chosen possible excluded]
   (if (and (empty? possible) (empty? excluded))
     (conj acc chosen)
-    (loop [acc acc, possible possible, excluded excluded]
-      (if (seq possible)
-        (let [node (first possible)
-              chosen' (conj chosen node)
-              possible' (clojure.set/intersection possible (neighbourhood graph node))
-              excluded' (clojure.set/intersection excluded (neighbourhood graph node))]
-          (recur (do-bron-kerbosch graph acc chosen' possible' excluded')
-                 (disj possible node)
-                 (conj excluded node)))
-        acc))))
+    (let [pivot (if (seq possible) (first possible) (first excluded))]
+      (loop [acc acc
+             candidates (clojure.set/difference possible (neighbourhood graph pivot))
+             possible possible
+             excluded excluded]
+        (if (seq candidates)
+          (let [node (first candidates)
+                chosen' (conj chosen node)
+                possible' (clojure.set/intersection possible (neighbourhood graph node))
+                excluded' (clojure.set/intersection excluded (neighbourhood graph node))]
+            (recur (do-bron-kerbosch graph acc chosen' possible' excluded')
+                   (rest candidates)
+                   (disj possible node)
+                   (conj excluded node)))
+          acc)))))
 
 (defn bron-kerbosch [graph]
   (do-bron-kerbosch graph [] #{} (set (keys graph)) #{}))
