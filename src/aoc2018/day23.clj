@@ -43,6 +43,10 @@
                 :when (overlaps r0 r1)]
             [r0 r1])))
 
+(defn constraint [region]
+  (let [[[x y z] r] region]
+    (+ x y z (- r))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def clique-size 980) ;; Found by inspection of neighbour counts.
@@ -60,4 +64,4 @@
      (let [total-graph (overlap-graph regions)
            graph (get-big-subgraph total-graph clique-size)
            clique (complete-intersection graph)]
-       clique)]))
+       (apply max (map constraint clique)))]))
