@@ -55,7 +55,9 @@
               chosen' (conj chosen node)
               possible' (clojure.set/intersection possible (neighbourhood graph node))
               excluded' (clojure.set/intersection excluded (neighbourhood graph node))]
-          (do-bron-kerbosch graph acc chosen' possible' excluded'))
+          (recur (do-bron-kerbosch graph acc chosen' possible' excluded')
+                 (disj possible node)
+                 (conj excluded node)))
         acc))))
 
 (defn bron-kerbosch [graph]
