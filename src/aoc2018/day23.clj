@@ -30,10 +30,49 @@
         :when (<= (mh pos p) radius)]
     p))
 
+(defn overlaps [[pos0 r0] [pos1 r1]]
+  (<= (mh pos0 pos1) (+ r0 r1)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn overlap-graph [regions]
+  (reduce (fn [graph [r0 r1]]
+            (update graph r0 #(conj (or % #{}) r1)))
+          {}
+          (for [r0 regions, r1 regions
+                :when (overlaps r0 r1)]
+            [r0 r1])))
+
+(defn clique? [graph node-set]
+  (every? (partial clojure.set/subset? node-set) (map graph node-set)))
+
+(defn mh-expand-step [acc coords n]
+  (if (= 1 (count coords))
+    (list (conj acc (+ n (first coords))))
+    (apply concat (for [i (range (inc n))]
+                    (mh-expand-step (conj acc (+ (first coords) i))
+                                    (rest coords)
+                                    (- n i))))))
+
+(defn mh-expand [xyz]
+  (let [integers (iterate inc 0)]
+    (mapcat (partial mh-expand-step [] xyz) integers)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(def clique-size 980) ;; Found by inspection of neighbour counts.
+
+(defn get-big-subgraph [graph neighbour-limit]
+  (apply dissoc graph (filter (fn [node] (< (count (graph node)) neighbour-limit)) (keys graph))))
+
+(defn complete-intersection [graph]
+  (apply clojure.set/intersection (vals graph)))
 
 (defsolution day23 [input]
   (let [regions (parse-input input)]
     [(let [biggest (biggest-region regions)]
        (count (regions-inside regions biggest)))
-     0]))
+     (let [total-graph (overlap-graph regions)
+           graph (get-big-subgraph total-graph clique-size)
+           clique (complete-intersection graph)]
+       clique)]))
