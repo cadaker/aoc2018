@@ -72,6 +72,50 @@
           {}
           (attack-order attackers)))
 
+(defn remove-unit [lookup [faction id]]
+  (update lookup faction (fn [x] (dissoc x id))))
+
+(defn damage-unit [unit damage]
+  (let [units-lost (quot damage (:hp unit))]
+    (update unit :count (fn [c] (- c units-lost)))))
+
+(defn combat-result [all-units unit-id damage]
+  (let [unit (get-in all-units unit-id)]
+    (if (>= damage (* (:hp unit) (:count unit)))
+      (remove-unit all-units unit-id)
+      (assoc-in all-units unit-id (damage-unit unit damage)))))
+
+(defn with-faction [faction ids]
+  (map (partial vector faction) ids))
+
+(defn combat-action-order [all-units]
+  (let [all-ids (concat (with-faction :imm (keys (:imm all-units)))
+                        (with-faction :inf (keys (:inf all-units))))]
+    (reverse (sort-by (fn [id] (:initiative (get-in all-units id))) all-ids))))
+
+(defn combat-round [imm inf]
+  (let [all-units {:imm imm :inf inf}
+        all-targets {:imm (into {} (for [[k v] (target-selection imm inf)]
+                                     [k [:inf v]]))
+                     :inf (into {} (for [[k v] (target-selection inf imm)]
+                                     [k [:imm v]]))}]
+    (loop [action-order (combat-action-order all-units)
+           remaining-units all-units]
+      (let [attacker-id (first action-order)
+            attacker (when attacker-id (get-in remaining-units attacker-id))
+            defender-id (when attacker-id (get-in all-targets attacker-id))
+            defender (when defender-id (get-in remaining-units defender-id))]
+        (cond
+         (and attacker defender)
+         (let [dmg (damage attacker defender)]
+           (recur (rest action-order) (combat-result remaining-units defender-id dmg)))
+
+         (nil? attacker-id)
+         [(:imm remaining-units) (:inf remaining-units)]
+
+         :else
+         (recur (rest action-order) remaining-units))))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defsolution day24 [input]
