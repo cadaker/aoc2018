@@ -162,5 +162,6 @@
         (is (= (imm 1) nil))
         (is (= (imm 2) nil))
         (is (= (:count (inf 1)) 782))
-        (is (= (:count (inf 2)) 4434))))
+        (is (= (:count (inf 2)) 4434))
+        (is (= (total-count inf) 5216))))
     ))

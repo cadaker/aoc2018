@@ -116,9 +116,17 @@
          :else
          (recur (rest action-order) remaining-units))))))
 
+(defn fight [imm inf]
+  (first (drop-while (fn [[imm inf]] (and (seq imm) (seq inf)))
+                     (iterate (fn [[imm inf]] (combat-round imm inf)) [imm inf]))))
+  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn total-count [units]
+  (reduce + (map :count (vals units))))
+
 (defsolution day24 [input]
-  (let [[imm inf] (parse-input input)]
-    [[imm inf]
+  (let [[imm-0 inf-0] (parse-input input)
+        [final-imm final-inf] (fight imm-0 inf-0)]
+    [(total-count (if (empty? final-imm) final-inf final-imm))
      0]))
