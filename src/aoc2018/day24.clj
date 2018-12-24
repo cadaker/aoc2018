@@ -117,16 +117,40 @@
          (recur (rest action-order) remaining-units))))))
 
 (defn fight [imm inf]
-  (first (drop-while (fn [[imm inf]] (and (seq imm) (seq inf)))
-                     (iterate (fn [[imm inf]] (combat-round imm inf)) [imm inf]))))
-  
+  (loop [imm imm inf inf]
+    (let [[imm' inf'] (combat-round imm inf)]
+      (cond
+       (or (empty? imm') (empty? inf')) [imm' inf']
+       (and (= imm imm') (= inf inf')) [imm inf]
+       :else (recur imm' inf')))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn monotonic-find-first [func]
+  (loop [n 0]
+    (if (func n)
+      n
+      (recur (inc n)))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn total-count [units]
   (reduce + (map :count (vals units))))
 
+(defn boost [units amount]
+  (reduce (fn [units id]
+            (update-in units [id :attack] (partial + amount)))
+          units
+          (keys units)))
+
+(defn boosted-fight [imm-0 inf-0 amount]
+  (let [[imm inf] (fight (boost imm-0 amount) inf-0)]
+    (empty? inf)))
+
 (defsolution day24 [input]
-  (let [[imm-0 inf-0] (parse-input input)
-        [final-imm final-inf] (fight imm-0 inf-0)]
-    [(total-count (if (empty? final-imm) final-inf final-imm))
-     0]))
+  (let [[imm-0 inf-0] (parse-input input)]
+    [(let [[final-imm final-inf] (fight imm-0 inf-0)]
+       (total-count (if (empty? final-imm) final-inf final-imm)))
+     (let [min-boost (monotonic-find-first (partial boosted-fight imm-0 inf-0))
+           [imm inf] (fight (boost imm-0 min-boost) inf-0)]
+       (total-count (if (empty? imm) inf imm)))]))
