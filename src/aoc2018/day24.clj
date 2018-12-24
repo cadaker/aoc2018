@@ -45,6 +45,35 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn effective-power [unit]
+  (* (:count unit) (* (:attack unit))))
+
+(defn attack-order [units]
+  (reverse (sort-by (fn [ix] [(effective-power (units ix)) (:initiative (units ix))]) (keys units))))
+
+(defn damage [attacker defender]
+  (let [power (effective-power attacker)]
+    (cond
+     (seq (filter #{(:attack-type attacker)} (:immune-to defender))) 0
+     (seq (filter #{(:attack-type attacker)} (:weak-to defender))) (* power 2)
+     :else power)))
+
+(defn target-order [attacker defenders]
+  (reverse (sort-by (fn [ix]
+                      (let [defender (defenders ix)]
+                        [(damage attacker defender) (effective-power defender) (:initiative defender)]))
+                    (keys defenders))))
+
+(defn target-selection [attackers defenders]
+  (reduce (fn [targets attacker-id]
+            (let [attacker (attackers attacker-id)
+                  choices (remove (set (vals targets)) (target-order attacker defenders))]
+              (assoc targets attacker-id (first choices))))
+          {}
+          (attack-order attackers)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defsolution day24 [input]
   (let [[imm inf] (parse-input input)]
     [[imm inf]
